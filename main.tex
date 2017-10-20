@@ -185,7 +185,7 @@ For instance, in the NDA timing phase estimation, this criterion yields an objec
 \end{equation}
 while the DA carrier frequency recovery often uses an objective function equal to
 \begin{equation}
-\Lambda ({f_\Delta })=\sum\limits_{i = 1}^N {{{\left| {c_i^*{x_i}(\tau ,{f_\Delta })} \right|}}}. 
+\Lambda ({\Delta f_c })=\sum\limits_{i = 1}^N {{{\left| {c_i^*{x_i}(\tau ,{f_\Delta })} \right|}}}. 
 \end{equation}
 where \(c_i^*\) is the complex conjugate of the \(i\)-th training data.
 If we take a close look at these two likelihood functions, they are actually aimed at achieving the the same objective, which is to maximize the energy of the data samples.
@@ -489,11 +489,12 @@ To be specific, we can replace the squared signal term in O\&M algorithm with th
 such that the the timing phase is given by
 
 \begin{equation}
-\tau  = \frac{T}{{2\pi }}\arg \left\{ {\sum\limits_{k = 0}^{N_{sps}-1} {H(k){e^{ - j2\pi k/N_{sps}}}} } \right\},
+\tau  = \frac{T}{{2\pi }}\arg \left\{ {\sum\limits_{i = 0}^{N_{sps}-1} {H(k){e^{ - j2\pi i/N_{sps}}}} } \right\},
 \label{eq:ff_alg}
 \end{equation}
 where \(T\) is the symbol period and \(N_{sps}\) is the number of samples per symbol, which should be at least 4 as well.
-Eye diagram entropy at timing phase \(k\) is denoted as \(H(k)\).
+The operation \(\arg( \cdot )\) returns the phase angles, in radians.
+Eye diagram entropy at timing instant \(i\) is denoted as \(H(k)\).
 Note that (\ref{eq:ff_alg}) assumes that the entropy curve is symmetric to the centre of the eyediagram,
 but it may not stand with high noise level or multipath channels.
 It will be further discussed in Section \ref{sec:performance}.
@@ -506,19 +507,34 @@ Then sweep the trial CFO in a certain range and find the frequency with minimum 
 We will study the characteristic of the entropy curve first and then use a block average method to cope with sharp trough problem.
 
 In the previous discussion, we know that the constellation entropy is almost constant when the CFO is greater than a frequency limit.
-Within this frequency limit, the curve has a V-shape trough and the entropy's global minimum is located in the middle of the trough.
+Within this frequency limit, the curve has a V-shape trough and the entropy global minimum is located in the middle of the trough.
 For a given modulation index, the width of the trough is decided by the CFO \(\Delta f_c\), the symbol rate $f_{sym}$ and the number of data samples $N$ in the window.
-For example, the \(M\)-PSK modulated signal has a minimum constellation phase difference \(2\pi/M\), and its instantaneous phase will shift due to CFO.
-The entropy increases with the CFO when the accumulate phase shift of \(N\) samples is smaller than the minimum constellation phase difference. 
-This trough range is given by
+For example, the \(M\)-PSK modulated signal has a minimum constellation phase difference \(2\pi/M\).
+The accumulated phase shift due to CFO is given by \(2\pi \Delta f_c N / f_{sym}\).
+The constellation entropy increases with the CFO until the accumulated phase shift is greater than the minimum constellation phase difference. 
+Therefore, trough range is given by
 \begin{equation}
-\frac{{\left| {\Delta {f_c}} \right|}}{{{f_{sym}}}} < \frac{1}{{MN}}
+\frac{{\left| {\Delta {f_c}} \right|}}{{{f_{sym}}}} < \frac{1}{{MN}}.
 \label{eq:freq_limit}
 \end{equation}
 Beyond that range, the entropy curve is going to be flat.
 
-From (\ref{eq:freq_limit}), to obtain a wide entropy trough in terms of normalized CFO, one possible way is to use less data samples, but that will degrade the accuracy of entropy estimation.
 
+In (\ref{eq:freq_limit}), if \(N\) is equal to a few hundred, the CFO that can fall into the entropy trough is on the order of 0.1\% of the symbol rate, which is much smaller than the CFO range we want to cover.
+The resulting entropy curve as a function of trial CFO is basically flat with a sharp trough, 
+so the linear search will require a very small step to achieve high frequency resolution, while a gradient descent algorithm cannot converge due to lack of gradient.
+As a consequence, an efficient search algorithm cannot be applied. 
+
+In order to cover a large estimation range without intensive computation, an algorithm that can expand the width of the trough is in demand.
+To obtain a wide entropy trough, one possible way is to use less data samples (reduce \(N\)), but that will lead to inaccurate PDF and entropy estimation.
+Similar to~\cite{YuanlingHuang2007}, a block average algorithm can be adopted.
+\begin{enumerate}
+\item The \(N\) data samples are segmented into small blocks, and each of these block has \(L\) samples. There can be overlaps for the blocks to improve the accuracy.
+\item Estimate the entropy curve for each block.
+\item Average the entropy results from all the blocks.
+\end{enumerate}
+If the CFO is constant for all the data samples, each block is suppose to have the same entropy curve with random fluctuation.
+By averaging the entropy curve from small blocks, a wide and smooth entropy trough is achieved.
 
 
 With the same settings as in section \ref{sec:timing}, the numerical simulation of the constellation entropy (blue dashed line) is plotted as a function of the CFO.
@@ -542,48 +558,34 @@ A perfect symbol timing is assumed, and the CFO is swept within 1\% of the symbo
 \end{figure}   
 
 % \subsubsection{Entropy Curve Expansion}
-It is obvious that there is only one global minimum when the CFO is equal to zero and there are no other local minimum.
-However, a efficient search algorithm still cannot be applied because the curve is basically flat with a sharp trough.
-Since the linear search will require a very small step to achieve high frequency resolution, while a gradient descent algorithm cannot converge due to zero gradient.
-In order to cover a large estimation range without intensive computation, an algorithm that can expand the width of the trough is in demand.
-
-
-In Fig. \ref{fig:freq_entp}, the orange dash-dot line is the entropy curve estimated with 50 samples.
-The trough range is \(\pm 0.5\%\) and it is agree with (\ref{eq:freq_limit}).
+It is obvious that there is only one global minimum when the CFO is equal to zero and there are no other local minimum as predicted.
+In Fig. \ref{fig:freq_entp}, the entropy estimated using 50 samples is also shown.
+The trough range is \(\pm 0.5\%\) of symbol rate and it is agree with (\ref{eq:freq_limit}).
 Indeed, the trough range is expanded 8 times, but many fluctuations and local minimum show up.
-Enlightened by \cite{YuanlingHuang2007}, a block average algorithm can be adopted.
-\begin{enumerate}
-\item The \(N\) data samples are segmented into small blocks, and each of these block has \(L\) samples. There can be overlaps for the blocks to improve the accuracy.
-\item Estimate the entropy curve for each block.
-\item Average the entropy results from all the blocks.
-\end{enumerate}
-If the CFO keeps constant for all the data samples, each block is suppose to have the same entropy curve with random fluctuation.
-By averaging the entropy curve from small blocks, a wide and smooth entropy trough is achieved.
-The results from block average algorithm is plotted as the yellow solid line in Fig. \ref{fig:freq_entp}.
-It has the same expanded trough as the entropy estimated using 50 samples, but with smooth gradient.
+The results from block average algorithm has the same expanded trough as the entropy estimated using 50 samples, but with smooth gradient.
 
 Given the expanded entropy trough, a more efficient two-step linear search is readily to apply.
 First, a coarse search through the interested frequency range with half trough wide step size can give us a approximate CFO.
-A second search with fine frequency step will only focus on the frequency range near the coarse estimation result.
+A second search with fine frequency step only sweeps in the frequency range near the coarse estimation result.
 
-Also note that the computation complexity grows aquatically with the number of samples, breaking down into small blocks can significantly reduce the required computation.
+Also note that the computation complexity grows quadratically with the number of samples, breaking down into small blocks can significantly reduce the required computation.
 In the previous case, if 400 samples is equally divided into 8 blocks without overlap, which is 50 samples per block, it is readily to find it only requires 1/8 of the total computation of Euclidean distance. 
 
 
 In the above discussion, the CFO in each data batch is estimated and compensated,
-but the phase is not considered and there is  phase discontinuity between batches.
+but the phase is not considered and there is phase discontinuity between batches.
 The initial phase of the data batch should be aligned with the last batch to ensure the phase continuity before the following carrier recovery.
 % \subsubsection{Carrier Phase Continuity}
 %     - only carrier frequency is recovered, phase different between blocks
 %       - keep phase continuity between blocks
 
-\textbf{to be continued...}
-In high data-rate cases, the synchronization parameters
-(ε, θ, ω) vary slowly in comparison with the symbol interval.
-They can be assumed piecewise constant over a number of
-symbol periods. Synchronization of these quasi-constant parameters
-will be considered here, while tracking of the slowly
-varying parameters can be done in a post-processing unit [3].
+% \textbf{to be continued...}
+% In high data-rate cases, the synchronization parameters
+% (ε, θ, ω) vary slowly in comparison with the symbol interval.
+% They can be assumed piecewise constant over a number of
+% symbol periods. Synchronization of these quasi-constant parameters
+% will be considered here, while tracking of the slowly
+% varying parameters can be done in a post-processing unit [3].
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Performance Evaluation}
 \label{sec:performance}
@@ -591,6 +593,7 @@ In this section, the performance of the synchronization algorithms in the previo
 % The evaluation results are obtained by performing a number of 1000 Monte Carlo trials.
 Also, a set of measurement data from an underwater acoustic communication test is synchronized with the EM based algorithm.
 
+\subsection{Numerical Simulation}
 % \subsection{Symbol Timing Performance}
 \textit{Experiment 1:
 Performance of the symbol timing recovery in the presence of AWGN.}
@@ -600,13 +603,12 @@ Since it has the same structure as the proposed feedforward timing recovery algo
 The performance comparison in the presence of AWGN is presented in Fig. \ref{fig:timing_per}.
 In this figure, both QPSK and 16-QAM modulation schemes are tested.
 A RRC filter with a rolloff factor of 0.25 is used for both pulse shaping and matched filtering.
-Complex AWGN is applied to the signal and the symbol to noise ratio (\(E_s/N_0\)) ranges from 5 to 35~dB with the step of 5~dB.
-For each \(E_s/N_0\) setting, 1000 Monte Carlo trials are preformed.
-Each trial, a block size of 100 samples are evaluated to generate a timing phase.
-
-After obtaining the  timing variance, the results are normalized by the symbol period.
+Complex AWGN is applied to the signal and the symbol energy to noise PSD ratio (\(E_s/N_0\)) ranges from 5 to 40~dB with the step of 5~dB.
+For each \(E_s/N_0\) setting, 500 Monte Carlo trials are tested.
+In each trial, a block size of 100 samples are evaluated to estimate the timing instant.
+After normalization by the symbol period, the variances of the timing instant estimates are plotted in the figure..
 It is necessary to compare the results with the theoretical limit.
-Following \cite{mengali1997synchronization}, the modified Cram\'er-Rao bound (MCRB) is also plotted in the figure as a reference.
+Following \cite{mengali1997synchronization}, the modified Cram\'er-Rao bound (MCRB) is also plotted as a reference.
 
 \begin{figure}[ht]
 \centering
@@ -616,14 +618,24 @@ Following \cite{mengali1997synchronization}, the modified Cram\'er-Rao bound (MC
 \end{figure}   
 
 Several conclusions can be draw from this figure.
-Generally speaking, the EM based symbol timing algorithm has lower variance than the ML based O\&M algorithm for both QPSK and 16-QAM modulation schemes when the  \(E_s/N_0\) is sufficiently high.
+Generally speaking, the EM based symbol timing algorithm has lower variance than the O\&M algorithm for both QPSK and 16-QAM modulation schemes when the  \(E_s/N_0\) is sufficiently high.
 % This transition \(E_s/N_0\) is 8~dB for QPSK and 27~dB for 16-QAM
 For both algorithms, the low modulation order tends to yield smaller timing variance.
-The performance of O\&M algorithm is limited by the self noise in high \(E_s/N_0\) region. 
-The strong self noise due to the small rolloff factor makes O\&M algorithm reaches its lower boundary when the \(E_s/N_0\) is greater than 25~dB, while the EM  algorithm doesn't seem to be affected.
+In the high \(E_s/N_0\) region, the performance of O\&M algorithm is limited by the self noise . 
+When the \(E_s/N_0\) is greater than 25~dB, the strong self noise due to the small rolloff factor makes O\&M algorithm reaches its lower boundary , while the EM based algorithm doesn't seem to be affected, since  its timing varicance keeps getting smaller with  \(E_s/N_0\).
 However, in low \(E_s/N_0\) region, the EM algorithm has inferior performance comparing with ML algorithm.
-This is because of the assumption that the entropy curve is symmetric within one symbol period, and this is only stand with low noise level.
 
+
+Note that in the simulation, the rolloff factor is 0.25 ,which means it occupies relative small bandwidth and leading to excessive ISI.
+This scenario is in favour of EM based algorithm, since it is looking for the timing instant with minimum ISI.
+However, if we have a larger rolloff factor, say 0.75, the O\&M algorithm will have the performance very close to the MCRB \cite{mengali1997synchronization}.
+On the other hand, the enlarged signal bandwidth and reduced ISI make the EM based algorithm have inferior performance than the O\&M algorithm.
+
+\textit{Experiment 2:
+Performance of the symbol timing recovery in the presence of CFO.}
+The EM based symbol timing recovery is insensitive to the CFO, but it is interesting to understand how the performance changes in case of CFO. 
+The settings are basically the same as the last simulation, but we will use BPSK and QPSK modulation schemes this time.
+The introduced CFO is 1\% of the symbol rate, and the timing variance is plotted in Fig. \ref{fig:timing_frq_per}.
 
 \begin{figure}[ht]
 \centering
@@ -632,27 +644,81 @@ This is because of the assumption that the entropy curve is symmetric within one
 \label{fig:timing_frq_per} 
 \end{figure}  
 
-R = ?
+For the BPSK modulation scheme, EM based algorithm shows good performance that is close to MCRB before \(E_s/N_0\) reaching 30 dB.
+It has the highest performance improvement comparing to the O\&M algorithm.
+But as to the QPSK modulation scheme, both algorithms have very similar performane curve, and no improvement can be found in this setting.
 
+This is because the EM based algorithm in (\ref{eq:ff_alg}) assumes that the eye diagram entropy curve is symmetrical to the centre of the eye diagram, and this only stands with low modulation order and noise level.
+We will show another asymmetrical eye diagram entropy condition in the next simulation. 
 
-rolloff
-
-CFO
-
-multipath
-
+\textit{Experiment 3:
+EM based symbol timing recovery in multipath channel.}
+One of the most important issue a single carrier coherent communication system facing is the multipath channel.
+It is interesting to understand how the EM based symbol timing recovery performs in such condition.
+Consider a block of BPSK modulated signal which is pulse shaped by the RRC filter with  a rolloff factor of 0.5.
+The multipath channel has a impulse response
+\begin{equation}
+\delta(t)-0.5(t-1.8T).
+\end{equation}
+and  \(E_s/N_0 = 25 \textrm{ dB}\).  
+In the receiver side after the down converter and matched filter, the eyediagram and the corresponding entropy are shown in Fig. \ref{fig:per_timing_isi}. 
 \begin{figure}[ht]
 \centering
 \includegraphics[width=3 in]{pic/per_timing_multi.eps}
 \caption{An eye diagram in the presence of ISI (upper) and the corresponding eye diagram entropy (lower).}
-\label{fig:timing_frq_per} 
+\label{fig:per_timing_isi} 
 \end{figure} 
 
-test with sea trial measurement data
-\section{Algorithm Validation with Sea Trial Data }
+In the figure, there is no clear eye opening in the eye diagram, and the entropy curve is asymmetrical to the centre of the eye diagram with both global and local minimum. 
+The timing phase with the global minimum is located at \(-0.1\), where the eye diagram has three small eyes at their maximum opening.
+The minimum entropy indicates that the least ISI is obtained in this timing instant.
+With such the timing instant choice, the equalizer can converge faster and produce stable results.
+On the contrary, the timing phase found by ML based timing recovery algorithm is still around 0, 
+where the output energy is maximized but with more random ISI.
+
+\textit{Experiment 4:
+Performance of carrier frequency recovery in the presence of AWGN.}
+In the test of carrier frequency recovery, perfect symbol timing is assumed.
+The signal is QPSK modulated with CFO at 1\% of symbol rate.
+Two algorithms are employed as the competitor to EM based algorithm to estimate the CFO:
+the open loop and the ML algorithm.
+
+The open loop algorithm proposed by \cite{Chuang1991} estimates the CFO  by averaging the differential phase error over the window.
+For QPSK modulation, the CFO is given by
+\begin{equation}
+\Delta f_c = \frac{f_{sym}}{8 \pi } \arg \left\{ {\sum\limits_{i = 1}^{{N} - 1} {{{\big( {x_i x^*_{i-1}} \big)}^4}} } \right\}.
+\end{equation}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=3 in]{pic/per_freq.eps}
+\caption{Performance of three carrier frequency recovery algorithms.}
+\label{fig:per_freq} 
+\end{figure} 
+
+The classic ML algorithm uses the same global search method as the EM based algorithm.
+The objective is given by (headache now, not sure if it's right) 
+\begin{equation}
+\Lambda ({\Delta f_c })=\left| \sum\limits_{k = 1}^N {{{ {{x^4_k}e^{-j8\pi \Delta f_c k T}}}}} \right|. 
+\end{equation}
+The CFO is estimated by search the trial frequency offset yields the highest energy.
+Similarly, the MCRB is also plotted in the figure as the performance reference.
+
+In Fig. \ref{fig:per_freq}, the EM algorithm shows much smaller estimation variance than the open loop algorithm, which proves its excellent carrier frequency recovery performance.
+However, the performance of the ML algorithm is mostly the same as the MCRB, making it slightly outperforms the EM based algorithm.
+
+There are several reasons that the EM algorithm may have inferior performance in symbol timing and carrier recovery than the ML based algorithms.
+First a few assumptions and approximations are used in the EM algorithms, making it less stable.
+The second reason is that the ML algorithms (not its approximations) are theoretically the optimum solution in AWGN channels. 
+It is supposed to reach the Cram\'er-Rao bound, therefore, the EM algorithms cannot achieve better performance.
+The EM algorithms are more suitable for channels with high order statistics that cannot be neglected.
+
+
+% test with sea trial measurement data
+\subsection{Algorithm Validation with Sea Trial Data }
 \label{sec:validation}
 In this section, the entropy minimization based synchronization algorithm will be validated with sea trial  measurement data. 
-\subsection{Sea Trial Environment and settings}
+% \subsection{Sea Trial Environment and settings}
 The sea trial took place in Northwest Arm near Halifax, NS, Canada on July 6th 2017. The experiment provided an opportunity to evaluate a variety of underwater communications algorithm.
 In the test area, the depth is reported to be approximately 10-13 m, and the receiver's deployment location is around 220 m away from the transmitter, and there is certain drift caused by the current.
 The sea state is favourable to the test. The acoustic propagation properties can also be observed using the channel impulse response in Fig. \ref{fig:chan_impu}, where there is a strong and stable direct path of arrival and very few multipath interference.
@@ -667,16 +733,16 @@ A transmission frame is divided into pilot and data blocks. The pilot block is a
 The data block is divided into four sections, and each section has a symbol rate of 240, 80, 15 and 5 baud respectively. The data consists of a pseudo-random noise (PN) sequence that has a length of 512 chips, and that is repeated 16 times.
 The modulation scheme used is QPSK, and the transmitted waveform is pulse shaped using a raised-cosine filter with a rolloff factor 0.5. The centre frequency is 2.048 kHz. 
 
-\subsection{Data Processing Results}
-\label{sec:results}
+% \subsection{Data Processing Results}
+% \label{sec:results}
 At the receiver, all signals are sampled at 44.1 kHz. The frame is first coarse synchronized with the pilot block so that the data block can be extracted.
 Down conversion and a matched filter are applied to the data block to generate the baseband signal.
 If the baseband signal is directly down-sampled and demodulated, the bit error rate (BER) is 49\%, which means no information is recovered.
 
-To recover the data, the synchronization algorithm discussed in Section \ref{sec:theory} is used before demodulation.
+To recover the data, the EM based synchronization algorithm is used before demodulation.
 For demonstration purposes, results from 80 baud data are presented here.
 In each iteration, 200 symbols are fed into the synchronizer to estimate the timing and carrier frequency offsets. 
-The timing and frequency recovery detector outputs are shown in Fig. \ref{fig:sync_results}.
+The timing and frequency recovery detector outputs are shown in Fig. \ref{fig:per_exp}.
 
 \begin{figure}[ht]
 \centering
@@ -698,16 +764,14 @@ The timing and frequency recovery detector outputs are shown in Fig. \ref{fig:sy
 % \caption{Synchronization results based on entropy minimization criterion.}
 % \label{fig:sync_results} %% 总 label
 % \end{figure}
-
-Several observations can be made from Fig.
-There is a total 8192 QPSK symbols for a total duration of 102.4~s.
+There are totally 8192 QPSK symbols for a total duration of 102.4~s.
 Both symbol timing and carrier frequency offset are varying with time.
 One possible cause is the Doppler effect due to the relative motion between the transmitter and the receiver.
 
 % The synchronized data are depicted in Fig. \ref{fig:scatter}.
 After demodulation, the BER is 0.41\%.
 As a comparison, with conventional synchronization methods (pilot and PLL based), the BER is 0.49\%.
-This result proved that the entropy minimization based synchronization algorithm is feasible and can reduce the BER.
+This result proved that the EM based synchronization algorithm is feasible and can reduce the BER significantly.
 
 
 
