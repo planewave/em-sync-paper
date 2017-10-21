@@ -80,7 +80,7 @@ Entropy minimization, symbol timing, carrier frequency recovery, synchronization
 
 \section{Introduction}
 \label{sec:intro}
-\IEEEPARstart{S}{ynchronization} is essential in wireless coherent receivers.
+\IEEEPARstart{I}{n} coherent wireless communications systems, synchronization is a key operation in the receiver.
 It is usually realized between the matched filter and the equalizer.
 The two main functions of the synchronizer are symbol timing and carrier recovery.
 The purpose of symbol timing recovery is to recover the symbol clock from the modulated waveform, so that it can sample the waveform at the correct \textit{symbol rate} and \textit{timing phase}.
@@ -181,11 +181,11 @@ where \(y\) is the output of the matched filter, \(\tau\) and \(f_\Delta\) are t
 Conventional synchronization methods intend to maximize the likelihood functions.
 For instance, in the NDA timing phase estimation, this criterion yields an objective function
 \begin{equation}
-\Lambda(\tau) =\sum\limits_{i = 1}^N {{{\left| {{x_i}( \tau )} \right|}^2}}, 
+\Lambda(\tau) =\sum\limits_{k = 1}^N {{{\left| {{x_k}( \tau )} \right|}^2}}, 
 \end{equation}
 while the DA carrier frequency recovery often uses an objective function equal to
 \begin{equation}
-\Lambda ({\Delta f_c })=\sum\limits_{i = 1}^N {{{\left| {c_i^*{x_i}(\tau ,{f_\Delta })} \right|}}}. 
+\Lambda ({\Delta f_c })=\left| \sum\limits_{k = 1}^N {{{{c_i^*{x_k}(\tau ,{f_\Delta })}}}} \right|. 
 \end{equation}
 where \(c_i^*\) is the complex conjugate of the \(i\)-th training data.
 If we take a close look at these two likelihood functions, they are actually aimed at achieving the the same objective, which is to maximize the energy of the data samples.
@@ -198,9 +198,9 @@ The Shannon entropy is a measure of the quantity of information  embedded in a s
 % In fact, we can also consider it as a measure of randomness or uncertainty of this signal.
 % The most common approach to estimate the entropy is defined below.
 % This Shannon entropy of discrete signal is defined below.
-Assuming \(k\) possible observations of a one-dimensional discrete signal, with \(p_i\) representing the probability of the \(i\)-th possibility, the information entropy \(H_S\) is commonly expressed as \cite{Shannon1948}
+Assuming \(M\) possible observations of a one-dimensional discrete signal, with \(p_k\) representing the probability of the \(k\)-th possibility, the information entropy \(H_S\) is commonly expressed as \cite{Shannon1948}
 \begin{equation}
-H_S =  - \sum\limits_{i = 1}^k {{p_i}\log {p_i}}.
+H_S =  - \sum\limits_{k = 1}^M {{p_k}\log {p_k}}.
 \label{eq:entropy}
 \end{equation}
 The base of the logarithmic function is usually chosen to be 2, and the corresponding entropy unit is \textit{bits}.
@@ -778,8 +778,9 @@ This result proved that the EM based synchronization algorithm is feasible and c
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusions}
 \label{sec:conc}
-R\'enyi
-\small
+
+
+% \small
 \bibliographystyle{IEEEbib}
 \bibliography{Mendeley}
 
