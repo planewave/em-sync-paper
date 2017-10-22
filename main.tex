@@ -83,47 +83,59 @@ Entropy minimization, symbol timing, carrier frequency recovery, synchronization
 \IEEEPARstart{I}{n} coherent wireless communications systems, synchronization is a key operation in the receiver.
 It is usually realized between the matched filter and the equalizer.
 The two main functions of the synchronizer are symbol timing and carrier recovery.
-The purpose of symbol timing recovery is to recover the symbol clock from the modulated waveform, so that it can sample the waveform at the correct \textit{symbol rate} and \textit{timing phase}.
+The purpose of symbol timing recovery is to recover the symbol clock from the modulated waveform, so that it can sample the waveform at the correct timing instant.
 With proper pulse shaping, matched filter and symbol timing, the data samples will have maximum signal to noise ratio (SNR) and no intersymbol interference (ISI)~\cite{mengali1997synchronization}.
-Also, coherent demodulation of a passband signal requires exactly the same carrier frequency and phase. 
+Also, coherent demodulation of a passband signal requires the down converter with exactly the same frequency as the carrier. 
 The receiver usually has an independent local oscillator to generate the carrier reference which deviates from the signal.  
 Thus, the synchronizer has to compensate for the carrier frequency offset (CFO). 
 In some applications, such as underwater acoustic communication, the channel may constantly change due to the time-variant channel or Doppler effect. 
 Therefore a continuous estimation and compensation of the synchronization error is essential to maintain the link reliability.
 
 % \textbf{a summary of standard solutions }
-Various synchronization schemes have been proposed in the literature.
-They are generally characterized by their structures and the availability of training data.
-The \textit{feedforward} structure directly extracts the timing tone or CFO  from the incoming signal.
-Whereas the \textit{feedback} structure uses a timing (or frequency) error detector to derive an error signal and feeds it back to recover the synchronization parameters.
-On the other hand, if the training data is available, we say the algorithm is \textit{supervised}, otherwise it is \textit{unsupervised}.
-This categorization is also known as \textit{data-aided} (DA), \textit{decision-directed} (DD) and \textit{non-data-aided} (NDA) \cite{mengali1997synchronization}.
+Various synchronization algorithms have been proposed in the literature.
+They are generally characterized by their configurations or the availability of training data.
+They can be either feedforward or feedback depending on their configurations.
+% The \textit{feedforward} structure directly extracts the timing tone or CFO  from the incoming signal.
+% Whereas the \textit{feedback} structure uses a timing (or frequency) error detector to derive an error signal and feeds it back to recover the synchronization parameters.
+% On the other hand, 
+If the training data is available, we say the algorithm is data-aided (DA), otherwise it is non-data-aided (NDA) or decision-directed (DD) \cite{mengali1997synchronization}.
 
-Except for few ad-hoc algorithms, all these synchronization schemes follow maximum likelihood (ML) criterion or its approximation.
-For example, the O\&M algorithm \cite{Oerder1988}, a magnitude-squared nonlinear spectral line method exploiting the cyclostationary properties of the modulated signal, is one of the most commonly used unsupervised  feedforward scheme for symbol timing recovery.
-It has been proved that this algorithm and its modifications can be asymptotically interpreted as ML estimators \cite{YanWang2002,Lopez-Salcedo2006}.
-Regarding the carrier recovery, the algorithms derived from ML criterion are trying to maximize the inner product between the  training sequence and the data samples (DA, DD) or the energy of the matched filter output (NDA) \cite{mengali1997synchronization}.
+% is supervised, otherwise it is unsupervised.
+% This categorization is also known as \textit{data-aided} (DA), \textit{decision-directed} (DD) and \textit{non-data-aided} (NDA) 
+
+Most synchronization algorithms follow the maximum likelihood (ML) criterion or its approximation.
+For example, the O\&M algorithm \cite{Oerder1988}, a magnitude-squared nonlinear spectral line method exploiting the cyclostationary properties of the modulated signal, is one of the most commonly used NDA feedforward algorithm for symbol timing recovery.
+It has been proven that this algorithm and its modifications can be asymptotically interpreted as ML estimators \cite{YanWang2002,Lopez-Salcedo2006}.
+Also, the NDA algorithm, Gardner timing error detector~\cite{Gardner1986} and its DA counterpart, zero-crossing detector~\cite{gardner1988demodulator} can be derived from ML criterion~\cite{Oerder1987DerivationPrinciple},
+Even though they have been brought out with ad-hoc reasoning,
+Regarding carrier recovery, the NDA feedforward frequency offset estimator proposed in~\cite{Wang2004} employs the fourth-order cyclostationary property, and still follows the ML criterion.
+Various DA frequency offset algorithms attempt to maximize the inner product between the  training sequence and the data samples can be treated as ML estimators as well~\cite{mengali1997synchronization}.
 
 % \textbf{What is scope of this paper }
-In this paper, we consider an alternative criterion that minimizes the entropy of the data samples. 
-Like the ML criterion, it aims to optimize a unified objective function.
-The scheme we will focus on is unsupervised and implemented in a feedforward receiver structure, but can be extended to other configurations in the future under the same criterion.
-Note that it has been shown in~\cite{Pedzisz2006} that the carrier frequency offset of the phase-shift keying (PSK) signals can be recovered by minimizing the entropy of the instantaneous phase probability density function.
+In this paper, we consider entropy minimizes (EM) as an alternative criterion for synchronization parameter estimation.
+To be specific, the entropy of the eye diagram is evaluated for symbol timing recovery, and the entropy of the constellation is measured for carrier frequency recovery.
+In both applications, the synchronization parameter leading to a minimum entropy value is considered to be optimum.
+% and the objective function based on this criterion is applied to both symbol timing and carrier frequency recovery.
+% Like the ML criterion, it aims to optimize a unified objective function.
+For validation purpose, the algorithm that will test in this work is NDA and implemented in a feedforward structure, but it can be extended to other configurations in the future under the same criterion.
+Note that it has been shown in~\cite{Pedzisz2006} that the carrier frequency offset of the phase-shift keying (PSK) modulated signals can be recovered by minimizing the entropy of the instantaneous phase probability density function.
 % Also, it has been reported that the error entropy minimization algorithms can be applied for channel equalization \cite{Santamaria2002}. 
 However, to the authors' knowledge,  the unified criterion for both symbol timing and carrier recovery with linear modulation schemes has not been studied.
 
-Since Shannon's work, entropy~\cite{Shannon1948} is used as a major tool in information theory. 
-But except for theoretical analysis, it is rarely used in signal processing because of its complexity~\cite{Bercher2000}.
+Since Shannon's work~\cite{Shannon1948}, entropy is an important concept in information theory. 
+But except for theoretical analysis, it is rarely used for signal processing purpose.
+Since it is difficult to estimate directly from samples without a model~\cite{Bercher2000,Santamaria2002}.
 Exceptionally, in the study of physiological data, researchers use simplified approximate entropy (ApEn)~\cite{Pincus1991}, or sample entropy (SampEn)~\cite{Richman2000} to estimate the complexity of the time series.
-Likewise, we will propose an ad-hoc entropy estimation algorithm to accelerate the synchronization searching. 
+Likewise, we will propose a customized entropy estimation algorithm to accelerate the synchronization searching. 
+The kernel function is used to estimate the normalized quadratic R\'enyi entropy~\cite{Santamaria2002,Huang2008}.
 
 % PMF not PDF
 % Unlike these systems, this paper focuses on
 %  \textbf{contributions}
-The contribution of this work is summarized as below.
-1)~The entropy minimization (EM) criterion is studied for symbol timing and carrier frequency recovery.
-2)~An ad-hoc entropy estimation algorithm is proposed for fast parameter estimation.
-3)~The practical issues of EM based synchronization algorithms is discussed. 
+% The contribution of this work is summarized as below.
+% 1)~The entropy minimization (EM) criterion is studied for symbol timing and carrier frequency recovery.
+% 2)~An ad-hoc entropy estimation algorithm is proposed for fast parameter estimation.
+% 3)~The practical issues of EM based synchronization algorithms is discussed. 
 
 \textbf{organization...}
 
@@ -269,7 +281,7 @@ However, the estimation of probability and the summation of multiple logarithm o
 In this section, we propose an ad-hoc algorithm that is trying to address this problem. 
 
 To solve this problem, some researchers turn to alternative definitions of entropy,
-particularly, R\'enyi entropy~\cite{Santamaria2002,Huang2008}.
+particularly, R\'enyi entropy.
 The R\'enyi entropy  with parameter \(\alpha\) is defined as
 \begin{equation}
 H_{R }={\frac {1}{1-\alpha }}\log {\Bigg (}\sum _{i=1}^{k}p_{i}^{\alpha }{\Bigg )}.
@@ -379,7 +391,7 @@ In practice, $r_{ag}$ can be set equal to the RMS value of the noise.
 % Similar with ApEn and SampEn algorithms, 
 It is best to apply the ad-hoc entropy estimation using a few hundred samples,
 because the required distance calculation exhibits quadratic growth with number of data samples. 
-The computational pressure can be relieved by either skipping the distance calculation of aggregated samples or using other distance metric (Chebychev etc. \cite{Cha2007ComprehensiveFunctions}).
+The computational pressure can be relieved by either skipping the distance calculation of aggregated samples or using other distance metric (Chebychev etc. \cite{Cha2007}).
 However, this is not an issue in our application since a reliable synchronization  recovery with less data samples is always preferred, and it is an advantage in tracking the dynamic channel conditions. 
 % 跟 histogram 比较性能
 % r 选择有什么影响
