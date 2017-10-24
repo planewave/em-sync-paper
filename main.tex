@@ -47,14 +47,14 @@
 %         John~Doe,~\IEEEmembership{Fellow,~OSA,}
         and~Jean-Fran\c{c}ois~Bousquet,~\IEEEmembership{Member,~IEEE}% <-this % stops a space
 
-\thanks{Manuscript received April 8, 2017; revised xxxx xx, 2017. This project was supported by the Atlantic Innovation Fund \#Project \#203162.}
+\thanks{Manuscript received November 8, 2017; revised xxxx xx, 2018. This project was supported by the Atlantic Innovation Fund \#Project \#203162.}
 \thanks{The authors are with the Department of Electrical and Computer Engineering, Dalhousie University, Halifax,
 NS, B3J 1Z1, Canada (e-mail: \{x.liu, jbousquet\}@dal.ca).}% <-this % stops a space
 % \thanks{J. Bousquet is with Dalhousie University.}% <-this % stops a space
 }
 
 % The paper headers
-\markboth{IEEE Transactions on Wireless Communications,~Vol.~xx, No.~x, xxxxxx~2017}%
+\markboth{IEEE Transactions on Communications,~Vol.~xx, No.~x, xxxxxx~2017}%
 {Shell \MakeLowercase{\textit{et al.}}: Entropy Minimization Based Symbol Timing and Carrier Frequency Recovery}
 
 % make the title area
@@ -618,24 +618,23 @@ In the previous case, if 400 samples is equally divided into 8 blocks, it is eas
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Performance Evaluation}
 \label{sec:performance}
-In this section, the performance of the synchronization algorithms in the previous sections are assessed by numerical simulation.
-% The evaluation results are obtained by performing a number of 1000 Monte Carlo trials.
-Also, a set of measurement data from an underwater acoustic communication test is synchronized with the EM based algorithm.
+In this section, the performance of the synchronization algorithms presented in the previous section are assessed by numerical simulation.
+We will compare the timing and frequency estimation error variance between the EM and ML algorithms.
+Several critical system nonidealities that affect the performance are examined closely, including the noise, timing with CFO and multipath.
+Finally, to evaluate the performance of the EM algorithm in real time varying conditions, it is applied to a set of data measured in a sea trial.
 
 \subsection{Numerical Simulation}
 % \subsection{Symbol Timing Performance}
-\textit{Experiment 1:
-Performance of the symbol timing recovery in the presence of AWGN.}
-The O\&M algorithm is a batch, feedforward symbol timing estimator.
-Since it has the same structure as the proposed feedforward timing recovery algorithm, it is used here to represent the ML based estimator in the performance comparison.
+First, we will examine the performance of the symbol timing recovery algorithms in the presence of AWGN.
+The O\&M algorithm is a batch, feedforward symbol timing estimator with the same structure as the proposed timing recovery algorithm~(\ref{eq:ff_alg}), therefore, it is used here to represent the ML estimator in the performance comparison.
 
-The performance comparison in the presence of AWGN is presented in Fig. \ref{fig:timing_per}.
+The performance comparison results in the presence of AWGN are shown in Fig. \ref{fig:timing_per}.
 In this figure, both QPSK and 16-QAM modulation schemes are tested.
-A RRC filter with a rolloff factor of 0.25 is used for both pulse shaping and matched filtering.
-Complex AWGN is applied to the signal and the symbol energy to noise PSD ratio (\(E_s/N_0\)) ranges from 5 to 40~dB with the step of 5~dB.
+An RRC filter with a rolloff factor of 0.25 is used for both pulse shaping and matched filtering.
+Complex AWGN is applied to the signal and the symbol energy to noise spectral density ratio (\(E_s/N_0\)) ranges from 5 to 40~dB with a step of 5~dB.
 For each \(E_s/N_0\) setting, 500 Monte Carlo trials are tested.
-In each trial, a block size of 100 samples are evaluated to estimate the timing instant.
-After normalization by the symbol period, the variances of the timing instant estimates are plotted in the figure..
+In each trial, a block size of 100 samples are evaluated to estimate the TD.
+After normalization by the symbol period, the timing error variances are plotted in the figure.
 It is necessary to compare the results with the theoretical limit.
 Following \cite{mengali1997synchronization}, the modified Cram\'er-Rao bound (MCRB) is also plotted as a reference.
 
@@ -647,24 +646,23 @@ Following \cite{mengali1997synchronization}, the modified Cram\'er-Rao bound (MC
 \end{figure}   
 
 Several conclusions can be draw from this figure.
-Generally speaking, the EM based symbol timing algorithm has lower variance than the O\&M algorithm for both QPSK and 16-QAM modulation schemes when the  \(E_s/N_0\) is sufficiently high.
+Generally speaking, when the  \(E_s/N_0\) is sufficiently high, the EM based symbol timing algorithm has lower variance than the O\&M algorithm for both QPSK and 16-QAM modulation schemes.
 % This transition \(E_s/N_0\) is 8~dB for QPSK and 27~dB for 16-QAM
 For both algorithms, the low modulation order tends to yield smaller timing variance.
-In the high \(E_s/N_0\) region, the performance of O\&M algorithm is limited by the self noise . 
-When the \(E_s/N_0\) is greater than 25~dB, the strong self noise due to the small rolloff factor makes O\&M algorithm reaches its lower boundary , while the EM based algorithm doesn't seem to be affected, since  its timing varicance keeps getting smaller with  \(E_s/N_0\).
+% In the high \(E_s/N_0\) region, the performance of O\&M algorithm is limited by the self noise. 
+When the \(E_s/N_0\) is greater than 25~dB, the strong self noise due to the small rolloff factor makes O\&M algorithm reaches its lower boundary, while the EM algorithm doesn't seem to be affected, since  its timing variance keeps getting smaller with the increased \(E_s/N_0\).
 However, in low \(E_s/N_0\) region, the EM algorithm has inferior performance comparing with ML algorithm.
 
 
-Note that in the simulation, the rolloff factor is 0.25 ,which means it occupies relative small bandwidth and leading to excessive ISI.
-This scenario is in favour of EM based algorithm, since it is looking for the timing instant with minimum ISI.
+Note that in the simulation, the rolloff factor is 0.25, which means the signal occupies relative small bandwidth but with excessive ISI.
+This scenario is in favour of EM based algorithm, since the eye diagram entropy estimation is eventually to measure the ISI.
 However, if we have a larger rolloff factor, say 0.75, the O\&M algorithm will have the performance very close to the MCRB \cite{mengali1997synchronization}.
 On the other hand, the enlarged signal bandwidth and reduced ISI make the EM based algorithm have inferior performance than the O\&M algorithm.
 
-\textit{Experiment 2:
-Performance of the symbol timing recovery in the presence of CFO.}
-The EM based symbol timing recovery is insensitive to the CFO, but it is interesting to understand how the performance changes in case of CFO. 
-The settings are basically the same as the last simulation, but we will use BPSK and QPSK modulation schemes this time.
-The introduced CFO is 1\% of the symbol rate, and the timing variance is plotted in Fig. \ref{fig:timing_frq_per}.
+% \textit{Experiment 2: Performance of the symbol timing recovery in the presence of CFO.}
+As shown in Fig. \ref{fig:timing_freq}, the EM based symbol timing recovery is insensitive to the CFO, but it is interesting to understand how the performance changes in the presence of CFO. 
+The settings are generally the same as the last simulation, but we will use BPSK and QPSK modulation schemes this time.
+The introduced CFO is 1\% of the symbol rate, and the timing variances are plotted in Fig. \ref{fig:timing_frq_per}.
 
 \begin{figure}[ht]
 \centering
@@ -675,48 +673,60 @@ The introduced CFO is 1\% of the symbol rate, and the timing variance is plotted
 
 For the BPSK modulation scheme, EM based algorithm shows good performance that is close to MCRB before \(E_s/N_0\) reaching 30 dB.
 It has the highest performance improvement comparing to the O\&M algorithm.
-But as to the QPSK modulation scheme, both algorithms have very similar performane curve, and no improvement can be found in this setting.
+But as to the QPSK modulation scheme, both algorithms have very similar performance curve, and no improvement can be found in this setting.
 
-This is because the EM based algorithm in (\ref{eq:ff_alg}) assumes that the eye diagram entropy curve is symmetrical to the centre of the eye diagram, and this only stands with low modulation order and noise level.
+This is because the EM based algorithm in (\ref{eq:ff_alg}) assumes that the eye diagram entropy curve is symmetrical to the centre of the eye diagram, and this only stands with low modulation order and low noise level.
 We will show another asymmetrical eye diagram entropy condition in the next simulation. 
 
-\textit{Experiment 3:
-EM based symbol timing recovery in multipath channel.}
+% \textit{Experiment 3:EM based symbol timing recovery in multipath channel.}
 One of the most important issue a single carrier coherent communication system facing is the multipath channel.
-It is interesting to understand how the EM based symbol timing recovery performs in such condition.
-Consider a block of BPSK modulated signal which is pulse shaped by the RRC filter with  a rolloff factor of 0.5.
+We will examine how the EM based symbol timing recovery performs in such condition.
+Consider a set of BPSK modulated signal which is pulse shaped by the RRC filter with  a rolloff factor of 0.5.
 The multipath channel has a impulse response
 \begin{equation}
-\delta(t)-0.5(t-1.8T).
+\delta(t)-0.5(t-1.8T),
 \end{equation}
-and  \(E_s/N_0 = 25 \textrm{ dB}\).  
-In the receiver side after the down converter and matched filter, the eyediagram and the corresponding entropy are shown in Fig. \ref{fig:per_timing_isi}. 
+and \(E_s/N_0\) at 25 dB.  
+In the receiver side, after the down converter and matched filter, the eye diagram and the corresponding entropy are shown in Fig. \ref{fig:per_timing_isi}. 
 \begin{figure}[ht]
 \centering
 \includegraphics[width=3 in]{pic/per_timing_multi.eps}
-\caption{An eye diagram in the presence of ISI (upper) and the corresponding eye diagram entropy (lower).}
+\caption{An eye diagram after a multipath channel (upper) and the corresponding eye diagram entropy (lower).}
 \label{fig:per_timing_isi} 
 \end{figure} 
 
-In the figure, there is no clear eye opening in the eye diagram, and the entropy curve is asymmetrical to the centre of the eye diagram with both global and local minimum. 
-The timing phase with the global minimum is located at \(-0.1\), where the eye diagram has three small eyes at their maximum opening.
+In the figure, there is no clear eye opening in the eye diagram, and the entropy curve is asymmetrical to the centre with one global and several local minimum. 
+The timing instant with the global minimum is located at -0.1, where the eye diagram has three small eyes at their maximum opening.
 The minimum entropy indicates that the least ISI is obtained in this timing instant.
-With such the timing instant choice, the equalizer can converge faster and produce stable results.
-On the contrary, the timing phase found by ML based timing recovery algorithm is still around 0, 
+With this timing instant choice, the equalizer can converge faster and produce stable results.
+On the contrary, the timing instant found by ML based timing recovery algorithm is still around 0, 
 where the output energy is maximized but with more random ISI.
 
-\textit{Experiment 4:
-Performance of carrier frequency recovery in the presence of AWGN.}
+Finally, we will see the performance of the carrier frequency recovery algorithms in the presence of AWGN.
 In the test of carrier frequency recovery, perfect symbol timing is assumed.
 The signal is QPSK modulated with CFO at 1\% of symbol rate.
-Two algorithms are employed as the competitor to EM based algorithm to estimate the CFO:
+Two algorithms are employed as the competitor to the EM based algorithm for CFO estimation:
 the open loop and the ML algorithm.
 
-The open loop algorithm proposed by \cite{Chuang1991} estimates the CFO  by averaging the differential phase error over the window.
-For QPSK modulation, the CFO is given by
+% 红皮书 p105
+The open loop algorithm proposed in \cite{Chuang1991} estimates the CFO  by averaging the differential phase error over the window.
+For QPSK modulation scheme, the CFO is given by \cite{mengali1997synchronization}
 \begin{equation}
-\Delta f_c = \frac{f_{sym}}{8 \pi } \arg \left\{ {\sum\limits_{i = 1}^{{N} - 1} {{{\big( {x_i x^*_{i-1}} \big)}^4}} } \right\}.
+f_\Delta = \frac{1}{8 \pi T} \arg \left\{ {\sum\limits_{i = 2}^{{N} - 1} {{{\big( {x_i x^*_{i-1}} \big)}^4}} } \right\}.
+\label{eq:freq_openloop}
 \end{equation}
+
+The classic ML algorithm uses the same global search method as the EM algorithm.
+The objective is given by 
+\begin{equation}
+\Lambda (f_\Delta)=\left| \sum\limits_{i = 1}^N {{{ {{x^4_i}e^{-j8\pi f_\Delta i T}}}}} \right|^2. 
+\label{eq:freq_ml}
+\end{equation}
+The CFO is estimated by searching the trial CFO that yields the highest energy or applying a computationally efficient FFT-based implementation \cite{Wang2004}.
+Note that both (\ref{eq:freq_openloop}) and (\ref{eq:freq_ml}) are NDA algorithms and the power of 4 is applied to remove the modulation, which is not necessary in EM algorithm.
+The CFO estimated by three algorithms are normalized by the symbol rate,
+and for each \(E_s/N_0\) condition 500 trials are conducted to find out the variances.
+The results are plotted in Fig. \ref{fig:per_freq}, where the MCRB is also included as the performance reference.
 
 \begin{figure}[ht]
 \centering
@@ -725,32 +735,30 @@ For QPSK modulation, the CFO is given by
 \label{fig:per_freq} 
 \end{figure} 
 
-The classic ML algorithm uses the same global search method as the EM based algorithm.
-The objective is given by (headache now, not sure if it's right) 
-\begin{equation}
-\Lambda ({\Delta f_c })=\left| \sum\limits_{k = 1}^N {{{ {{x^4_k}e^{-j8\pi \Delta f_c k T}}}}} \right|. 
-\end{equation}
-The CFO is estimated by search the trial frequency offset yields the highest energy.
-Similarly, the MCRB is also plotted in the figure as the performance reference.
 
-In Fig. \ref{fig:per_freq}, the EM algorithm shows much smaller estimation variance than the open loop algorithm, which proves its excellent carrier frequency recovery performance.
-However, the performance of the ML algorithm is mostly the same as the MCRB, making it slightly outperforms the EM based algorithm.
+In the figure, the EM algorithm shows much smaller frequency variance than the open loop algorithm. 
+This proves its robust CFO estimation performance.
+However, the performance of the ML algorithm is mostly the same as the MCRB, making it slightly outperforms the EM algorithm.
+% When \(E_s/N_0\) is less than 10 dB, frequency variances of both the EM and ML algorithms grow 
 
 There are several reasons that the EM algorithm may have inferior performance in symbol timing and carrier recovery than the ML based algorithms.
-First a few assumptions and approximations are used in the EM algorithms, making it less stable.
-The second reason is that the ML algorithms (not its approximations) are theoretically the optimum solution in AWGN channels. 
-It is supposed to reach the Cram\'er-Rao bound, therefore, the EM algorithms cannot achieve better performance.
-The EM algorithms are more suitable for channels with high order statistics that cannot be neglected.
+First, the EM based algorithms (not the EM criterion itself) are derived under a few assumptions and approximations, which are not always true in practice.
+The second reason is that the ML criterion is theoretically the optimum solution in AWGN channels, where the the system can be characterized by the 2nd order statistics.
+Its performance is supposed to reach the Cram\'er-Rao bound, therefore, the EM algorithms cannot achieve better performance.
+The EM algorithms are more suitable for channels where high order statistics cannot be neglected.
 
 
 % test with sea trial measurement data
 \subsection{Algorithm Validation with Sea Trial Data }
 \label{sec:validation}
-In this section, the entropy minimization based synchronization algorithm will be validated with sea trial  measurement data. 
+Next, the EM based synchronization algorithms will be validated with realistic data measured in a sea trial. 
 % \subsection{Sea Trial Environment and settings}
-The sea trial took place in Northwest Arm near Halifax, NS, Canada on July 6th 2017. The experiment provided an opportunity to evaluate a variety of underwater communications algorithm.
+This underwater acoustic communication experiment took place in Northwest Arm near Halifax, Canada on July 6th 2017. 
+The experiment provided an opportunity to evaluate a variety of underwater communication algorithms.
+
 In the test area, the depth is reported to be approximately 10-13 m, and the receiver's deployment location is around 220 m away from the transmitter, and there is certain drift caused by the current.
-The sea state is favourable to the test. The acoustic propagation properties can also be observed using the channel impulse response in Fig. \ref{fig:chan_impu}, where there is a strong and stable direct path of arrival and very few multipath interference.
+The sea state is favourable to the test. 
+The acoustic propagation properties can also be observed using the channel impulse response in Fig. \ref{fig:chan_impu}, where there is a strong and stable direct path of arrival and very few multipath interference.
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=2.5in]{pic/channel.png}
@@ -759,19 +767,21 @@ The sea state is favourable to the test. The acoustic propagation properties can
 \end{figure}
 
 A transmission frame is divided into pilot and data blocks. The pilot block is a wideband, linear frequency modulated chirp signal, which is used for frame synchronization.
-The data block is divided into four sections, and each section has a symbol rate of 240, 80, 15 and 5 baud respectively. The data consists of a pseudo-random noise (PN) sequence that has a length of 512 chips, and that is repeated 16 times.
-The modulation scheme used is QPSK, and the transmitted waveform is pulse shaped using a raised-cosine filter with a rolloff factor 0.5. The centre frequency is 2.048 kHz. 
+The data block is divided into four sections, and each section has a symbol rate of 240, 80, 15 and 5 baud respectively. 
+A pseudo-random noise (PN) sequence consisting of 512 symbols is used as the data content.
+The modulation scheme is QPSK, and the transmitted waveform is pulse shaped using a RC filter with a rolloff factor of 0.5. 
+The carrier's centre frequency is 2.048 kHz. 
 
 % \subsection{Data Processing Results}
 % \label{sec:results}
 At the receiver, all signals are sampled at 44.1 kHz. The frame is first coarse synchronized with the pilot block so that the data block can be extracted.
-Down conversion and a matched filter are applied to the data block to generate the baseband signal.
-If the baseband signal is directly down-sampled and demodulated, the bit error rate (BER) is 49\%, which means no information is recovered.
+Down conversion and a matched filter are applied to the data block to generate the complex baseband signal.
 
-To recover the data, the EM based synchronization algorithm is used before demodulation.
+If we demodulate the samples without synchronization, the bit error rate (BER) is 51\%, which means no information is recovered.
+To recover the data, the EM based synchronization algorithms are applied.
 For demonstration purposes, results from 80 baud data are presented here.
-In each iteration, 200 symbols are fed into the synchronizer to estimate the timing and carrier frequency offsets. 
-The timing and frequency recovery detector outputs are shown in Fig. \ref{fig:per_exp}.
+In each iteration, 200 symbols are fed into the synchronizer to estimate the TD and CFO. 
+The symbol timing and carrier frequency estimator outputs are shown in Fig. \ref{fig:per_exp}.
 
 \begin{figure}[ht]
 \centering
@@ -794,13 +804,13 @@ The timing and frequency recovery detector outputs are shown in Fig. \ref{fig:pe
 % \label{fig:sync_results} %% 总 label
 % \end{figure}
 There are totally 8192 QPSK symbols for a total duration of 102.4~s.
-Both symbol timing and carrier frequency offset are varying with time.
+Both TD and CFO estimates are varying with time.
 One possible cause is the Doppler effect due to the relative motion between the transmitter and the receiver.
 
 % The synchronized data are depicted in Fig. \ref{fig:scatter}.
 After demodulation, the BER is 0.41\%.
 As a comparison, with conventional synchronization methods (pilot and PLL based), the BER is 0.49\%.
-This result proved that the EM based synchronization algorithm is feasible and can reduce the BER significantly.
+This result proves that the EM based synchronization algorithms are feasible and can reduce the communication system BER.
 
 
 
