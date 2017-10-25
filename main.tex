@@ -62,13 +62,18 @@ NS, B3J 1Z1, Canada (e-mail: \{x.liu, jbousquet\}@dal.ca).}% <-this % stops a sp
 
 
 \begin{abstract}
-This paper  presents a new entropy minimization criterion that is used for both symbol timing and carrier frequency recovery in a wireless receiver.
-It relies on the entropy estimation of the eye diagram and the constellation diagram of the received signal. 
-During the parameter search, when the perfect synchronization is achieved, the entropy will reach a sharp global minimum, indicating the least intersymbol interference or a restored constellation diagram. 
+This paper presents a new entropy minimization criterion for both symbol timing and carrier frequency recovery in  wireless receivers.
+The synchronization is achieved by minimizing the entropy estimated from the eye diagram and the constellation diagram. 
+A customized entropy estimation algorithm is proposed to achieve fast entropy estimation for the synchronization parameter search.
+The synchronization algorithms are implemented and several practical issues are addressed.
+Its performance is analyzed in controlled conditions and with realistic measurement data.
+Comparing to maximum likelihood based methods, it is shown that entropy minimization based algorithms have superior performance in various communication conditions, especially in channels with non-Gaussianity or non-linearity.
+
+% During the parameter search, when the perfect synchronization is achieved, the entropy will reach a sharp global minimum, indicating the least intersymbol interference or a restored constellation diagram. 
 % The minimized entropy indicates a regular pattern with the least interference, that is where the signal is synchronized and recovered correctly.
 % In the synchronization parameter search, the corresponding entropy reaches a sharp global minimum when the signal is recovered correctly.
-Unlike other synchronization methods, this unified criterion can be used to build an all-in-one synchronizer with high accuracy.
-The feasibility of this method is proven using a theoretical analysis and supported with numerical simulation. 
+% Unlike other synchronization methods, this unified criterion can be used to build an all-in-one synchronizer with high accuracy.
+% The feasibility of this method is proven using a theoretical analysis and supported with numerical simulation. 
 \end{abstract}
 
 % {\bf Keywords:} 
@@ -106,8 +111,7 @@ If the training data is available, we say the algorithm is data-aided (DA), othe
 Most synchronization algorithms follow the maximum likelihood (ML) criterion or its approximation.
 For example, the O\&M algorithm \cite{Oerder1988}, a magnitude-squared nonlinear spectral line method exploiting the cyclostationary properties of the modulated signal, is one of the most commonly used NDA feedforward algorithm for symbol timing recovery.
 It has been proven that this algorithm and its modifications can be asymptotically interpreted as ML estimators \cite{YanWang2002,Lopez-Salcedo2006}.
-Also, the NDA algorithm, Gardner timing error detector~\cite{Gardner1986} and its DA counterpart, zero-crossing detector~\cite{gardner1988demodulator} can be derived from ML criterion~\cite{Oerder1987},
-Even though they have been brought out with ad-hoc reasoning,
+Also, the NDA Gardner timing error detector~\cite{Gardner1986} and its DA counterpart, zero-crossing detector~\cite{gardner1988demodulator} can be derived from ML criterion~\cite{Oerder1987}.
 Regarding carrier recovery, the NDA feedforward frequency offset estimator proposed in~\cite{Wang2004} employs the fourth-order cyclostationary property, and still follows the ML criterion.
 Various DA frequency offset algorithms attempt to maximize the inner product between the  training sequence and the data samples can be treated as ML estimators as well~\cite{mengali1997synchronization}.
 
@@ -128,7 +132,8 @@ Since it is difficult to estimate directly from samples without a model~\cite{Be
 Exceptionally, in the study of physiological data, researchers use simplified approximate entropy (ApEn)~\cite{Pincus1991}, or sample entropy (SampEn)~\cite{Richman2000} to estimate the complexity of the time series.
 Likewise, we will propose a customized entropy estimation algorithm to accelerate the synchronization searching,
 where the kernel function is used to estimate the normalized quadratic R\'enyi entropy~\cite{Santamaria2002,Huang2008}.
-
+The third contribution of this work consists in demonstrating the performance in controlled conditions as well as in realistic underwater acoustic propagation conditions.  
+The effect of various channel impairments will be analyzed on the system performance.  
 % PMF not PDF
 % Unlike these systems, this paper focuses on
 %  \textbf{contributions}
@@ -144,16 +149,12 @@ where the kernel function is used to estimate the normalized quadratic R\'enyi e
 \label{fig:sysconf} 
 \end{figure*}
 
-\textbf{organization...}
-
-Preliminary results on this subject presented in [13] are here extended and consolidated in terms of
 This paper is organized as follows.
-
-In Section II,
-
-In Section III,
-
-performance analysis with simulation and sea trial data is investigated in Section \ref{sec:performance}. 
+In Section \ref{sec:entropy},
+an entropy minimization criterion for synchronization is introduced. 
+In Section \ref{sec:cust_entp}, a customized fast entropy estimation algorithm is described. 
+The algorithm implementation are presented in Section \ref{sec:imple}.
+In Section \ref{sec:perfo}, the performance of the algorithms are evaluated in controlled conditions, and the algorithm is also applied to realistic data.  
 Finally, conclusions are drawn in Section \ref{sec:conc}.
 % \clearpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -282,7 +283,7 @@ Therefore, like the symbol timing recovery, the carrier frequency recovery can b
 
 
 \section{Customized Fast Entropy Estimation Algorithm}
-\label{sec:adhoc}
+\label{sec:cust_entp}
 The entropy based algorithms are rarely used in signal processing because of their complexity~\cite{Bercher2000}.
 % To develop practical entropy minimization based synchronization algorithms, a fast entropy estimation method is required.
 % from the definition: histogram based estimation
@@ -409,11 +410,13 @@ However, this is not an issue in our application since a reliable synchronizatio
 % 跟 histogram 比较性能
 % r 选择有什么影响
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Symbol Timing and Carrier Frequency Recovery Algorithms}
-\label{sec:sync_algo}
-In this section, the entropy minimization criterion will be applied to symbol timing and carrier frequency recovery.
-The algorithms discussed here work in batch mode, which means the samples are processed block by block. 
-It is a direct result of the way entropy is estimated, however, after the initial acquisition, it is not difficult to adapt the algorithms to online mode with a sliding window.
+\section{Implementation of Symbol Timing and Carrier Frequency Recovery}
+\label{sec:imple}
+In this section, the entropy minimization criterion will be implemented to symbol timing and carrier frequency recovery.
+Several practical issues are addressed and the
+synchronization algorithms are discussed in detail. 
+% The algorithms discussed here work in batch mode, which means the samples are processed block by block. 
+% It is a direct result of the way entropy is estimated, however, after the initial acquisition, it is not difficult to adapt the algorithms to online mode with a sliding window.
 % EM based symbol timing and carrier frequency recovery algorithms
 
 
@@ -430,7 +433,7 @@ In the following discussion, we will focus on these topics: the entropy local mi
 The entropy reaches a global minimum in the centre of the eye diagram, but in practice, when the timing instant is close to the symbol transition area, the entropy may go down and create a local minimum. 
 The local minimum is not a big issue if the SNR is high and a global search is applied, but it will deteriorate the performance in low SNR cases or when using gradient based search algorithms.
 Since the entropy local minimum occurs with the low sample magnitude, an additional threshold can be introduced to eliminate the data samples with small magnitude in the entropy estimation.
-With this idea, the algorithm in Section~\ref{sec:adhoc} is amended:
+With this idea, the algorithm in Section~\ref{sec:cust_entp} is amended:
 
 \begin{enumerate}
 \item Define a threshold \(r_{mg}\) \((r_{mg}>0)\) and build a new samples set where all samples with its magnitude greater than \(r_{mg}\) are included.
@@ -524,7 +527,7 @@ such that the the TD can be found with
 where \(H(k)\) is the eye diagram entropy at timing instant \(k\).
 Note that (\ref{eq:ff_alg}) assumes that the entropy curve is symmetric to the centre of the eyediagram,
 but it may not stand with low SNR or multipath channel condition.
-Its performance will be further discussed in Section \ref{sec:performance}.
+Its performance will be further discussed in Section \ref{sec:perfo}.
 
 \subsection{Carrier Frequency Recovery}
 This section will focus on the EM based carrier frequency recovery algorithm.
@@ -615,13 +618,14 @@ In the previous case, if 400 samples is equally divided into 8 blocks, it is eas
 % symbol periods. Synchronization of these quasi-constant parameters
 % will be considered here, while tracking of the slowly
 % varying parameters can be done in a post-processing unit [3].
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% The effect of various channel impairments will be analyzed on the system performance.  
+%%%%%%%%%%
 \section{Performance Evaluation}
-\label{sec:performance}
-In this section, the performance of the synchronization algorithms presented in the previous section are assessed by numerical simulation.
-We will compare the timing and frequency estimation error variance between the EM and ML algorithms.
-Several critical system nonidealities that affect the performance are examined closely, including the noise, timing with CFO and multipath.
-Finally, to evaluate the performance of the EM algorithm in real time varying conditions, it is applied to a set of data measured in a sea trial.
+\label{sec:perfo}
+In this section, the performance of the synchronization algorithms presented in the previous section are assessed in controlled conditions.
+We will compare the timing and frequency estimation variance between the EM and ML algorithms.
+The effect of various channel impairments, including the noise, timing with CFO and multipath, are analyzed on the system performance.
+Finally, to examine the EM algorithm in realistic time varying channels, it is applied to a set of data measured in a sea trial.
 
 \subsection{Numerical Simulation}
 % \subsection{Symbol Timing Performance}
@@ -762,7 +766,7 @@ The acoustic propagation properties can also be observed using the channel impul
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=2.5in]{pic/channel.png}
-\caption{Channel impulse response as a function of time.}
+\caption{The timing varying channel impulse response.}
 \label{fig:chan_impu} 
 \end{figure}
 
@@ -786,7 +790,7 @@ The symbol timing and carrier frequency estimator outputs are shown in Fig. \ref
 \begin{figure}[ht]
 \centering
 \includegraphics[width=3 in]{pic/per_exp.eps}
-\caption{Synchronization results from EM based algorithms.}
+\caption{Symbol timing and carrier frequency estimation results from EM based algorithms.}
 \label{fig:per_exp} 
 \end{figure} 
 
@@ -817,8 +821,25 @@ This result proves that the EM based synchronization algorithms are feasible and
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusions}
 \label{sec:conc}
+In this paper, the entropy minimization criterion is proposed for symbol timing and carrier frequency recovery in wireless coherent receivers.
+It is an alternative to maximum likelihood criterion, which is the foundation of most of the standard synchronization algorithms. 
+By exploring the high order statistics of the signal, entropy minimization criterion is expected to possess superior performance. 
 
+The synchronizer is implemented by measuring the entropy of the eye diagram and the constellation.
+The optimum timing delay is found by search the timing instant with minimum eye diagram entropy, while the carrier frequency offset is estimated by searching through a range of frequencies and looking for the minimum constellation entropy.  
 
+The histogram based entropy estimation method requires a large amount of computation.
+In this paper, we proposed a customized fast entropy estimation algorithm.
+It is a modified version of quadratic R\'enyi entropy and the kernel density estimation method is employed to estimate the probabilities.
+
+Several practical issues are addressed when applying the entropy minimization criterion to signal synchronization.
+The proposed symbol timing algorithm can overcome local minimum, be insensitive to the carrier frequency offset, and don't need very high over sampling rate.
+The carrier frequency recovery algorithm uses a block average technique to expand the estimation range without compromising the accuracy. 
+
+The synchronization performance of the proposed algorithms are compared with the standard approaches by running a set of numerical simulations.
+It shows that the entropy minimization criterion is more suitable in channels with  non-Gaussianity or non-linearity.
+We also validated the algorithms with realistic data measured in a sea trial.
+Good tracking and compensating results are received in a time varying underwater acoustic channel.
 % \small
 \bibliographystyle{IEEEbib}
 \bibliography{Mendeley}
