@@ -5,6 +5,7 @@
 % \usepackage{amsfonts}
 \usepackage{amssymb}
 \usepackage{amsmath}
+\usepackage{array}
 \interdisplaylinepenalty=2500
 \usepackage{filecontents}
 \usepackage{url}
@@ -94,13 +95,13 @@ Entropy minimization, symbol timing, carrier frequency recovery, synchronization
 \IEEEPARstart{I}{n} coherent wireless communications systems, synchronization is a key operation at the receiver.
 It is usually realized between the matched filter and the equalizer.
 The two main functions of the synchronizer are symbol timing and carrier recovery.
-The purpose of symbol timing recovery is to recover the symbol clock from the modulated waveform, so that it can down sample the waveform with the correct timing delay~(TD).
+The purpose of symbol timing recovery is to recover the symbol clock from the modulated waveform, so that it can down sample the waveform with the correct timing delay offset~(TDO).
 At the output of a matched filter, signal sampled at the ideal instant will have maximum signal to noise ratio (SNR) and no intersymbol interference~(ISI)~\cite{mengali1997synchronization}.
 Also, in coherent communication systems, the down converter must have exactly the same frequency as the carrier of the input signal. 
 However, in practice, the local oscillator frequency deviates from the input signal's carrier frequency.  
 As such, the carrier frequency offset~(CFO) has to be compensated. 
 In some applications, such as underwater acoustic communication, the channel may constantly change due to the time-variant channel or Doppler effect. 
-Therefore a continuous estimation and compensation of the TD and CFO is essential to maintain the link reliability.
+Therefore a continuous estimation and compensation of the TDO and CFO is essential to maintain the link reliability.
 
 % \textbf{a summary of standard solutions }
 Various synchronization algorithms have been described in the literature.
@@ -120,24 +121,33 @@ While data-aided (DA) synchronization offers a superior performance, in this wor
 % This categorization is also known as \textit{data-aided} (DA), \textit{decision-directed} (DD) and \textit{non-data-aided} (NDA) 
 
 Most synchronization algorithms follow the maximum likelihood (ML) criterion or its approximation.
-For example, the O\&M algorithm \cite{Oerder1988}, a magnitude-squared nonlinear spectral line method exploiting the cyclostationary properties of the modulated signal, is one of the most commonly used NDA feedforward algorithm for symbol timing recovery.
-It has been proven that this algorithm and variants can be asymptotically interpreted as an ML estimator \cite{YanWang2002,Lopez-Salcedo2006}.
+For example, the Oerder and Meyr (O\&M) algorithm \cite{Oerder1988}, a magnitude-squared nonlinear spectral line method exploiting the cyclostationary properties of the modulated signal, is one of the most commonly used NDA feedforward algorithm for symbol timing recovery.
+It has been proven that this algorithm and variants can be asymptotically interpreted as an ML estimator~\cite{YanWang2002,Lopez-Salcedo2006}.
 Also, the NDA Gardner timing error detector~\cite{Gardner1986} and its DA counterpart, the zero-crossing detector~\cite{gardner1988demodulator} can be derived from the ML criterion~\cite{Oerder1987}.
 For carrier recovery, the NDA feedforward frequency offset estimator proposed in~\cite{Wang2004} employs the fourth-order cyclostationary property, and still follows the ML criterion.
-Various DA frequency offset algorithms attempt to maximize the inner product between the  training sequence and the data samples and can be treated as ML estimators as well~\cite{mengali1997synchronization}.
-The ML criterion assumes a Gaussian and linear system, two conditions that are not always satisfied in reality. 
+Various DA frequency offset algorithms attempt to maximize the inner product between the  training sequence and the data samples.
+The CFO estimation for orthogonal frequency division multiplexing (OFDM) is essential because it may result in loss of orthogonality between the OFDM carriers.
+In  \cite{Li2006, Li2008, Amar2017LowCommunication},
+% * <x.liu@dal.ca> 2018-02-06T17:15:31.656Z:
+% 
+% How to make multiple citations together?
+% 
+% ^.
+the CFO is given by minimizing a quadratic cost function.
+These methods can be treated as generalized ML estimators as well.
+% The ML criterion assumes a Gaussian and linear system, two conditions that are not always satisfied in reality. 
 
 % \textbf{What is scope of this paper }
 % In this paper, we consider entropy minimizes (EM) as an alternative criterion for synchronization parameter estimation.
-The primary contribution of this paper consists in the definition of a unified synchronization principle, the entropy minimization (EM). 
-Specifically, the entropy of the eye diagram is evaluated for symbol timing recovery, and the entropy of the constellation is measured for carrier frequency recovery.
+The primary contribution of this paper consists in the definition of a unified synchronization principle, the entropy minimization (EM) as an alternative to ML criterion. 
+Specifically, the entropy of the eye diagram is evaluated for symbol timing recovery, and the entropy of the constellation diagram is measured for carrier frequency recovery.
 For both applications, the synchronization parameter that leads to a minimum entropy value is considered to be optimum.
 % and the objective function based on this criterion is applied to both symbol timing and carrier frequency recovery.
 % Like the ML criterion, it aims to optimize a unified objective function.
 % The algorithms that will be applied in this work are NDA and implemented in a feedforward structure, but they can be extended to other configurations under the same criterion.
 Note that it has been shown in~\cite{Pedzisz2006} that the carrier frequency offset of the phase-shift keying (PSK) modulated signals can be recovered by minimizing the entropy of the instantaneous phase probability density function.
 % Also, it has been reported that the error entropy minimization algorithms can be applied for channel equalization \cite{Santamaria2002}. 
-However, to the authors' knowledge,  the unified criterion for both symbol timing and carrier recovery has not been proposed before. 
+However, we apply it to a broader  types of modulation schemes, and to the authors' knowledge,  the unified criterion for both symbol timing and carrier recovery has not been proposed before. 
 
 Since Shannon's work~\cite{Shannon1948}, entropy is an important concept in information theory. 
 However, it is rarely used in practice, because it is difficult to estimate directly from samples without a model~\cite{Bercher2000,Santamaria2002}.
@@ -179,8 +189,9 @@ Then, the application of the EM criterion to symbol timing and carrier frequency
 % There are other forms of definitions or expressions of entropy that won't be detailed here.
 % We will focus on how entropy can be applied in symbol timing and carrier frequency recovery.
 
-In this work, it is assumed that the signal is transmitted using coherent modulation, such as PSK, QAM (quadrature amplitude modulation) or CPM (continuous phase modulation), with an alphabet size of \(M\), where \(M\) is usually a power of 2.
-The received binary information follows an independent identical distribution.
+In this work, it is assumed that the signal is transmitted using coherent modulation schemes, such as PSK, QAM (quadrature amplitude modulation) or CPM (continuous phase modulation), with an alphabet size of \(M\), where \(M\) is usually a power of 2.
+In the following discussion, the QPSK modulation is often used as an example, but the application is not limited to low order modulation schemes only.
+The received binary information follows an independent identical distribution (i.i.d.).
 The modulated data is pulse shaped to limit the bandwidth occupancy.
 The root-raised-cosine (RRC) filter is chosen as the pulse shaping filter at the transmitter, which is designed under the Nyquist criterion, 
 such that there is no ISI at the proper sampling instants.
@@ -200,16 +211,16 @@ Assuming that the timing is known, the decimated samples (usually one or two sam
 Also, if the symbol timing is recovered first, the carrier recovery will have less computational burden due to the decimation of samples.
 Therefore, the preferred sequence in this work is to apply symbol timing before carrier frequency recovery.
 
-The $i$-th data sample \(x_i\) after timing and carrier frequency recovery can be expressed as
+The $i$-th data sample \(x_i\) after timing and carrier frequency recovery can be expressed as \cite{Xie2012ExactOFDM}
 \begin{equation}
-{x_i} = y(iT +  \tau ){e^{ - j2\pi {f_\Delta }iT}},
+{x_i}[\tau, f_\Delta ] = y(iT +  \tau, f_\Delta){e^{ - j2\pi {f_\Delta }iT}},
 \end{equation}
 % * <x.liu@dal.ca> 2018-01-31T19:31:05.424Z:
 % 
 % Is this model discrete time? we need to make it explicit.  Also, this can't model large Doppler spread.  We should mention this.  (See additional reference at the bottom). 
 % 
-% ^.
-where \(y\) is the output of the matched filter, \(T\) is the symbol period, \(\tau\) and \(f_\Delta\) are the TD and the CFO respectively.
+% ^ <x.liu@dal.ca> 2018-02-06T17:27:36.164Z.
+where \(y\) is the output of the matched filter, \(T\) is the symbol period, \(\tau\) and \(f_\Delta\) are the TDO and the CFO respectively.
 
 
 \subsection{Maximum Likelihood Versus Entropy Minimization}
@@ -224,8 +235,8 @@ while the DA carrier frequency recovery often uses an objective function~\cite{m
 \end{equation}
 where \(c_i^*\) is the complex conjugate of the \(i\)-th training data.
 These two objective functions are actually aimed at maximizing the energy of the data sample set.
-This type of estimation method uses second-order statistics of the samples and is suitable for linear channels with Gaussian noise.
-In interference limited propagation channels, where the AWGN condition is not respected, a criterion that considers the higher order statistics would be more appropriate.
+This type of estimation method uses second-order statistics of the samples and is suitable for linear channels with additive white Gaussian noise (AWGN).
+In channels that is not dominated by AWGN but by ISI, a criterion that considers the higher order statistics would be more appropriate.
 % Without the linearity and Gaussianity assumption, a criterion considering the higher order statistics would be appropriate.
 The entropy is a measure of randomness or uncertainty of this signal, and it is a function of the signal probability density function (PDF).
 As demonstrated in \cite{Santamaria2002}, by using entropy instead of likelihood function, the higher order statistics are taken into consideration.
@@ -249,36 +260,36 @@ To recover the symbol timing, the entropy of the eye diagram is utilized.
 % Normally, the length of the segment is one or two symbol periods. 
 % The symbol timing recovery problem can be then interpreted as finding the adequate timing instant on the eye diagram.
 Ideally, the down-sampling instant should be located in the middle of the eye diagram where the eye opening reaches its maximum.
-The symbol timing recovery problem can be then interpreted as adjusting the timing instant with a proper delay (TD) on the eye diagram.
+The symbol timing recovery problem can be then interpreted as adjusting the timing instant with a proper TDO on the eye diagram.
 % Fig. \ref{fig:eyediagram} is an eye diagram for a BPSK signal overlaid at each symbol period.
 % The binary data is shaped using raised-cosine pulses with a roll-off factor of 0.5.
 
 The eye diagram is composed of time domain signal traces that periodically overlaid in a window with a length of one or two symbol periods.
 We define the \textit{eye diagram entropy} as the entropy of signal that distributed at a certain timing instant on the eye diagram. 
 This can be further explained in Fig.~\ref{fig:eye_ent}.
-The eye diagram in Fig.~\ref{fig:eye_diag} is sliced vertically at four timing instances.
-The signal probability distributions at each timing instance are estimated using histogram in Fig.~\ref{fig:sig_prob}.
+The eye diagram in Fig.~\ref{fig:eye_diag} is sliced vertically at four timing instants.
+The signal probability distributions at each timing instants are estimated using histogram in Fig.~\ref{fig:sig_prob}.
 The histogram is a simple visualization of data distribution where bins are defined, and the number of data samples within each bin is tallied. 
 Here the number of samples is normalized and presented as probabilities.
-Then, the eye diagram entropy can be found using~equation. (\ref{eq:entropy}). 
+Then, the eye diagram entropy can be found using equation~(\ref{eq:entropy}). 
 \begin{figure}[htbp]
 \centering
-\subfigure[Timing instances on a typical eyediagram]{
+\subfigure[Timing instant on a typical eyediagram]{
 \label{fig:eye_diag}
 \includegraphics[width=3.1in]{pic/eye-ent-a.eps}}
 % \hspace{0.2in} % 两图间距
-\subfigure[Signal probability distribution at four timing instances]{
+\subfigure[Histograms of signal probability distribution]{
 \label{fig:sig_prob}
 \includegraphics[width=3.1in]{pic/eye-ent-b.eps}}
-\caption{Four timing instances on a typical eyediagram and the corresponding signal probability distribution.}
+\caption{Signal probability distribution on four timing instants on a typical eyediagram.}
 \label{fig:eye_ent} %% 总 label
 \end{figure}
 
-For example, a modulation scheme with alphabet size of \(M\) is implemented to transmit independent and identically distributed random data. 
-We assume that a filter satisfying Nyquist criterion is applied for pulse shaping, and the channel is ideal.
+For example, a given modulation scheme with alphabet size of \(M\) is implemented to transmit i.i.d. random data. 
+A RC filter is applied for pulse shaping, and the channel is ideal.
 % assuming no noise and perfect symbol timing (no ISI),
 % The ISI can be eliminated if sampling in the middle of the eye diagram.
-At the receiver, the signal samples at perfect symbol timing instance (in the middle of the eye diagram) can only distributed within \(M\) possible symbols equally.
+At the receiver, the signal samples at perfect symbol timing instant (in the middle of the eye diagram) can only distributed within \(M\) possible symbols equally.
 The probability that the samples belong to the $k$-th symbol is \(p_k=1/M\).
 Substituting the probability \(p_k\) into~(\ref{eq:entropy}), we have the minimum eye diagram entropy
 \begin{equation}
@@ -287,21 +298,25 @@ Substituting the probability \(p_k\) into~(\ref{eq:entropy}), we have the minimu
 \end{equation}
 which is exactly the same as the amount of information carried by each symbol.
 
-% If the pulse shaped symbols are sampled at the ideal sampling instants, 
-% there is no ISI and the entropy is minimized.
-% With Nyquist pulse shaping, there is no ISI in the middle of the eye diagram, so the ISI is not considered in~(\ref{eq:entropy_mid}).
-We claim that the minimum eye diagram entropy only exists when the perfect symbol timing is achieved, because according to Nyquist criterion, ISI goes to zero at these timing instances.
-If we exam the signal distribution at timing instance that deviates from the middle of the eye, interference from adjacent symbols with different amplitudes will mixed in, leading to increased randomness.
+
+We claim that the minimum eye diagram entropy only exists when the perfect symbol timing is achieved, because according to Nyquist criterion, ISI goes to zero at these timing instants.
+If we exam the signal distribution at timing instants that deviate from the middle of the eye, interference from adjacent symbols with different amplitudes will mixed in.
+It is tedious to build an analytical relationship between the eye diagram entropy and the timing instant, but one intuitive explanation is given as follows.
+As the timing instant is shifted away from the middle of the eye, the signal energy from current symbol decays but the interference  energy grows, leading to increased randomness.
 % * <x.liu@dal.ca> 2018-02-02T03:12:10.862Z:
 % 
-% It is difficult to build an analytical relationship between the eye diagram entropy and the timing instance, and I don't think it is necessary, but the reviewer asked for it...
-% Maybe I need spend some time working on it? an appendix is a good place for the derivation 
+% It is difficult to build an analytical relationship between the eye diagram entropy and the timing instant. Can we bypass it? same proof is needed in next section for frequency estimation
 % 
 % ^.
 Therefore, the entropy, as a measure of randomness,  will also increase accordingly.
 Since each interference pulse from adjacent symbols carries the same amount of information, 
 if the span of the pulse shaping filter is \(N_{span}\), 
 the maximum of eye diagram entropy will be \(N_{span}\) times of the amount of information carried by each symbol, which is 
+% * <x.liu@dal.ca> 2018-02-06T17:35:48.137Z:
+% 
+% is this explanation clear enough?
+% 
+% ^.
 \begin{equation}
 \max{H_{eye}} =  N_{span}\log_2 {M}.
 \label{eq:entropy_neb}
@@ -309,33 +324,64 @@ the maximum of eye diagram entropy will be \(N_{span}\) times of the amount of i
 % This maximum entropy is \(N_{span}\) times higher than the entropy measured in the middle of the eye diagram.
 % There may be existence of local minima which will be addressed later in this paper,
 % but one can conclude that the entropy of an eye diagram comes to a global minimum in the middle of the eye.
-In summary, the EM based symbol timing recovery seeks the timing instance with minimum eye diagram entropy. 
-% The desired timing instance 
+
+In summary, the EM based symbol timing recovery seeks the timing instant with minimum eye diagram entropy. 
+% The desired timing instant 
 % The Nyquist criterion 
 The eye diagram entropy can be seen as an indicator of the ISI that introduced by pulse shaping filters.
-So the  desired timing instance with zero ISI is the instance with minimum eye diagram entropy. 
+So the  desired timing instant with zero ISI is the instant with minimum eye diagram entropy. 
 % Therefore, the symbol timing recovery can be approached by searching the timing instant with the minimum eye diagram entropy.
 
 
 \subsection{Constellation Diagram Entropy and Carrier Frequency Recovery}
 \label{sec:const_entp}
-When the passband signal is converted to baseband, the complex data can be visualized as a constellation diagram.
+When the passband signal is down converted to baseband, the complex data can be visualized as a constellation diagram.
 However, if the frequency of the local oscillator is  different (even very small) from the carrier of the signal, the resulting constellation diagram is rotating and cannot be demodulated reliably.
-We will focus on recovering a CFO that is smaller than the symbol rate, since for extremely large CFO, a preceding coarse carrier recovery is usually required.
+We will focus on recovering a CFO that is much smaller than the symbol rate, since for large CFO, a preceding coarse carrier recovery is usually required.
 
-If the down converted signal is impaired by CFO, it exhibits increased randomness in the constellation diagram, which can be measured by the \textit{constellation diagram entropy}.
-% The increased randomness in the constellation diagram is due to the CFO and the resulting rotating constellation. 
-% is unlike the eye diagram, where ISI.
-% This randomness can be measured by the \textit{constellation diagram entropy}.
-% Assuming perfect timing recovery, the constellation diagram entropy reaches to a minimum when there is no CFO.
-% So, the expression of its minimum value is the same as~(\ref{eq:entropy_neb}).
-The entropy has a global minimum corresponding to a zero CFO, and its value is equal to the amount of the information carried by the symbol, which is the same as~(\ref{eq:entropy_neb}).
-The entropy maximum value is obtained when either the CFO or the number of samples are large enough,
-such that the accumulated signal phase error is greater than the minimum phase difference of the signal modulation scheme. 
-More discussion on entropy based carrier recovery can be found in \cite{Pedzisz2006}.
+
+The randomness of the signal distribution on the constellation diagram can be quantitatively measured by \textit{constellation diagram entropy}.
+Similar to eye diagram entropy, the histogram can be used for probability estimation.
+However, a 2D histogram is needed to present both inphase and quadrature components on the constellation diagram.
+An example of noise free QPSK constellation diagrams with zero, mild and strong CFO and the corresponding histograms is shown in Fig.~\ref{fig:const_hst}.
+The constellation diagram entropy can be estimated with such 2D histograms.
+Intuitively, from equation~(\ref{eq:entropy}), the highest probability peaks in the histogram gives the lowest entropy (such as Fig.~\ref{fig:const_hst}(a)).
+The probability can be roughly considered as equal in all histogram bins that occupied, 
+therefore, it can be presented by \(p_{const} \approx {1}/{n_{bin}}\), where \(n_{bin}\) is the number of histogram bins loaded with signal samples.
+Thus, the constellation entropy is given by
+\begin{equation}
+H_{const} \approx - n_{bin} p_{const} \log_2 {p_{const}} \approx -\log_2 {\frac{1}{n_{bin}}}.
+\label{eq:const_ent}
+\end{equation}
+When the CFO is zero, \(\min{n_{bin}}=M\),  the minimum constellation entropy is
+\begin{equation}
+\min{H_{const}=\log_2 {M}},
+\end{equation}
+which is the same as (\ref{eq:entropy_mid}).
+There is also a upper limit of the constellation entropy when the signal samples form a ``circle'' shape on the constellation diagram.
+% * <x.liu@dal.ca> 2018-02-06T17:41:24.169Z:
+% 
+% I tried, but any reviewer can easily argue "no rigorous proof"
+% 
+% ^.
+This phenomenon will be further discussed in Section~\ref{sec:carrier_recovery}.
+Also, an analytically discussion is provided in \cite{Pedzisz2006} to prove that the entropy has a global minimum corresponding to a zero CFO with PSK modulation.
+% , and its value is equal to the amount of the information carried by the symbol, which is the same as~(\ref{eq:entropy_neb}).
+% The entropy maximum value is obtained when either the CFO or the number of samples are large enough,
+% such that the accumulated signal phase error is greater than the minimum phase difference of the signal modulation scheme. 
+% More discussion on entropy based carrier recovery can be found in \cite{Pedzisz2006}.
+
+\begin{figure*}[ht]
+\centering
+\includegraphics[width=3 in]{pic/const_hst.eps}
+\caption{Constellation diagrams with different carrier frequency offset and the corresponding histograms of signal probability distribution.}
+\label{fig:const_hst} 
+\end{figure*}
+
 % add content from my wuwnet paper
 % The probability density function (PDF) of its instantaneous phase can be used to estimate the entropy, and with the help of
-It is important to note that, like the symbol timing recovery, the carrier frequency recovery can be achieved by searching the frequency with minimum constellation diagram entropy.
+It is important to note that, like the symbol timing estimation, the carrier frequency estimation can be achieved by searching the CFO with minimum constellation diagram entropy.
+However, the global search for minimum entropy and the entropy estimation with histogram are not efficiency in practical implementation.
 In the next two sections, a methodology to implement this unified criterion will be described.
 
 \section{Customized Fast Entropy Estimation Algorithm}
@@ -347,13 +393,14 @@ According to the Shannon entropy equation~(\ref{eq:entropy}), the entropy is a f
 However, the estimation of the PDF with histogram and the summation of multiple logarithm operations  in equation~(\ref{eq:entropy}) have high computational complexity.
 In this section, we propose a fast customized entropy estimation algorithm that is suitable for EM based synchronization parameter recovery. 
 
-To reduce computational complexity, alternative definitions of entropy have been proposed, such as the R\'enyi entropy.
+To reduce the entropy estimation complexity, alternative definitions of entropy have been proposed, such as the R\'enyi entropy.
 The R\'enyi entropy  with parameter \(\alpha\) is defined as \cite{renyi1961measures}
 \begin{equation}
 H_{R }={\frac {1}{1-\alpha }}\log {\Bigg (}\sum _{k=1}^{M}p_{k}^{\alpha }{\Bigg )}.
 \label{eq:renyi}
 \end{equation}
-As explained in \cite{Bromiley2004}, when $\alpha~\to~1$, the R\'enyi entropy tends to equal Shannon's entropy.
+As explained in \cite{Bromiley2004}, when $\alpha~\to~1$, the R\'enyi entropy tends to equal Shannon entropy.
+Thus, the R\'enyi entropy is a generalization of Shannon entropy.
 The quadratic R\'enyi entropy ($\alpha=2$) is chosen in this work for its simplicity and as suggested in~\cite{Santamaria2002}.
 Then, (\ref{eq:renyi}) reduces to
 \begin{equation}
@@ -362,40 +409,52 @@ H_{R2 }=-\log {\Bigg (}\sum _{i=1}^{M}p_{k}^{2 }{\Bigg )}.
 \end{equation}
 Note that in (\ref{eq:renyi2}), the logarithmic function is  external to the sum of the quadratic probabilities.
 Because the logarithm function is monotonic, minimizing~(\ref{eq:renyi2}) is equivalent to maximizing its internal portion.
-Since we are looking for a minimum entropy, and it's absolute value is not necessary, the logarithm function can be dropped out without compromising the searching for the minimum value.
-% \textit{information potential} $V$
-% \begin{equation}
-% V=\sum _{i=1}^{k}p_{i}^{2 }.
-% \end{equation}
-
-To further investigate the portion in parenthesis in equation~(\ref{eq:renyi2}), a faster probability estimation method is in need to replace the histogram based algorithm.
-The \textit{kernel density estimation} is used to estimate the probabilities.
-% * <x.liu@dal.ca> 2018-02-02T04:09:58.876Z:
+Since only relative value is needed for searching a minimum entropy, the logarithm function can be dropped out without compromising our goal.
+% * <x.liu@dal.ca> 2018-02-06T18:16:02.187Z:
 % 
-% OK I will talk about some background of the kernel method 
+% do I clearly state why the logarithm can be dropped here?  
 % 
 % ^.
-Given a set of \(N\) samples, \(i=1, \dots, N\), the sample PDF at an observation \(\xi\) can be estimated by~\cite{Principe2000a}
+
+To further investigate the portion in parenthesis in equation~(\ref{eq:renyi2}), a faster probability estimation method is required to replace the histogram based algorithm.
+As suggested in~\cite{Principe2000a}, we use the \textit{kernel density estimation} (KDE) method
+It is also known as the Parzen's window \cite{Parzen1962} as one of the most well-known non-parametric approaches to estimate the underlying PDF of samples. 
+% which is suggested in~\cite{Principe2000a}.
+% is used to estimate the probabilities.
+% * <x.liu@dal.ca> 2018-02-02T04:09:58.876Z:
+% 
+% OK I will talk about some background of the kernel method, why  and how to choose r 
+% 
+% ^ <x.liu@dal.ca> 2018-02-06T18:44:03.440Z.
+Given a set of \(N\) samples, \(i=1, \dots, N\), the sample PDF at an observation \(\xi\) can be estimated 
 \begin{equation}
 { p(\xi)={\frac {1}{N}}\sum _{i=1}^{N}K_{r}\left(\xi-x_i\right)},
-\label{eq:kernel}
+\label{eq:kde}
 \end{equation}
 where $K_r(\cdot)$ is a kernel function with a positive parameter $r$.
-Then, by substituting (\ref{eq:kernel}) into (\ref{eq:renyi2}) and after some simplification, we have
+Then, by substituting (\ref{eq:kde}) into (\ref{eq:renyi2}) and after some simplification, we have
 \begin{equation}
 H_{R2 }=-\log {\Bigg (}\frac{1}{N^2}\sum _{i=1}^{N}\sum _{j=1}^{N}K_{r}\left(x_i-x_j\right){\Bigg )}.
+\label{eq:ker_ent_est}
 \end{equation}
-Among various kernel functions, a simple top-hat kernel used to accelerate the computation is given by
+
+Among various kernel functions, the Gaussian kernel is adopted in~\cite{Principe2000a}, but we further simplify it to a top-hat kernel (at a cost of reasonable accuracy loss) to accelerate the computation. 
+This kernel function is given by
 \begin{equation}
 {\displaystyle K_{r}(x)={\begin{cases}1,&|x|\leq r\\0,&{\mbox{otherwise.}}\end{cases}}}
+\label{eq:tophat}
 \end{equation}
-% Despite its computational complexity, a major problem with histograms is that the choice of binning can have a side effect on the results.
-% This interesting feature inspired us to develop a new ad-hoc entropy estimation algorithm for our application.
+where the threshold \(r\) is used to determine if the two samples are closely located that can contribute to the entropy estimation.
+The choice of \(r\) will be detailed later in this section.
+% * <x.liu@dal.ca> 2018-02-06T19:19:10.431Z:
+% 
+% The choice of r is  explained here
+% 
+% ^ <x.liu@dal.ca> 2018-02-09T18:23:42.791Z.
+With~(\ref{eq:ker_ent_est}) and~(\ref{eq:tophat}), the entropy can be estimated by  measuring the distances between samples instead of using histograms.
 
-Now, the entropy can be estimated by  measuring the distances between samples instead of using the histogram.
-% The proposed algorithm measure the aggregation degree of data samples by measuring the Euclidean distances between samples.
-% The number of data samples $x_i$ under observation is denoted as \(N\), 
-The proposed entropy estimation algorithm is summarized as:
+
+With the discussion above, the proposed entropy estimation algorithm is summarized as:
 \begin{enumerate}
 \item Calculate all the distances \(d_{ij}\) between each sample pair \(x_i\) and \(x_j\), where \(1\le i<N\) and \( i<j \le N\). We have
  \begin{equation}
@@ -412,23 +471,20 @@ H_{MRE}= \frac{ H_{sp}}{ N(N-1)/2}.
 \end{enumerate}
 
 
-The entropy \(H_{sp}\) can be alternatively interpreted as a measure of the sample aggregation,
-and the threshold \(r_{ag}\) is used to determine if the two samples are closely located or separated.
-Samples that aggregate into only a few groups indicate low entropy, whereas samples that sparsely distributed suggest high entropy.
-The choice of \(r_{ag}\) will be discussed later in this section.
+
 % The last step normalizes $H_{sp}$, so that the modified R\'enyi entropy $H_{MR}$ does not depend on the number of samples.
 The final result \(H_{MRE}\) is the modified version of the quadratic R\'enyi entropy  by dropping off the logarithm function and using the kernel function for PDF estimation.
 % We will call it the \textit{modified R\'enyi entropy} in the rest of the paper.
 Because of the normalization, the value of $H_{MRE}$ is limited from 0 to 1 and is unitless.
-This algorithm does not need to produce a histogram and does not need to compute the logarithm, making it much faster than the conventional entropy estimation method.
+This algorithm does not need to produce a histogram and does not need to compute the logarithm function, making it much faster than the conventional entropy estimation method.
 
 % Another interpolation 
 % In the study of physiological time series data, researchers use  approximate entropy (ApEn) \cite{Pincus1991}, or sample entropy (SampEn) \cite{Richman2000}. to estimate the complexity of the time series.
 % Instead of estimating the probability of samples, theses algorithms are looking for the probability of new patterns.
 % In practice, the entropy increases for newer patterns. 
 
-An example of the modified R\'enyi entropy estimation of a constellation diagram as a function of SNR is shown in Fig. \ref{fig:MRE}, where the 2D histogram based Shannon entropy results are also plotted as a reference.
-The samples consists of 1000 QPSK modulated (\(M=4\)) random symbols with unit power.
+An example of the MRE estimation of a constellation diagram as a function of SNR is shown in Fig. \ref{fig:MRE}, where the 2D histogram based Shannon entropy results are also plotted as a reference.
+The samples consists of 1000 QPSK modulated random symbols with unit amplitude and perfect timing recovery.
 
 \begin{figure}[ht]
 \centering
@@ -442,13 +498,13 @@ In Fig. \ref{fig:MRE}, the histogram based estimation is evaluated for a bin wid
 When the SNR is sufficiently high, the histogram based algorithm reaches the minimum. 
 Its value is 2 bits in Fig. \ref{fig:MRE}, as was predicted by~(\ref{eq:entropy_mid}).
 
-Next let's derive the minimum value of the modified R\'enyi entropy and compare it with the numerical results shown in Fig.~\ref{fig:MRE}.
+Next let's derive the minimum value of the MRE and compare it with the numerical results shown in Fig.~\ref{fig:MRE}.
 Since the symbols are random, there are four groups of symbol points distributed in the constellation diagram, and each group has \(N/4\) samples.
 The condition of $d_{ij}>r_{ag}$ can only be satisfied between samples with different constellation positions.
 For two constellation positions, we have $H_{sp} = (N/4)^2$, so the total $H_{sp}$ will be $6 (N/4)^2$ if four constellation positions are considered.
-Thus, the minimum value of the modified R\'enyi entropy is approximated by
+Thus, the minimum value of the MRE is approximated by
 \begin{equation}
-H_{MR} \approx \frac{ 6 \left(N/4\right)^2}{N^2/2}=0.75.
+\min{H_{MRE}} \approx \frac{ 6 \left(N/4\right)^2}{N^2/2}=0.75.
 \label{eq:adEntQPSK}
 \end{equation}
 which agrees with the results shown in Fig.~\ref{fig:MRE}.
@@ -458,18 +514,29 @@ It can be seen that both algorithms are monotonic functions of SNR.
 The decreasing entropy reflects the fact that the uncertainty of the system is reduced with the increasing SNR.
 This property shows that the proposed algorithm can be used to measure the data randomness.
 
-The choice of the threshold \(r_{ag}\) depends mainly on the noise level.
-In Fig.~\ref{fig:MRE}, the curve with \(r_{ag}=0.2\) reflects the change of randomness at high SNR, but saturates in the low SNR region, in which case \(r_{ag}=0.4\) is preferred.
-This behaviour is observed because when the threshold is small, the algorithm cannot accurately quantify the degree of aggregation of large scale distributed data samples.
-In practice, $r_{ag}$ can be set to be equal to the root-mean-square value of the noise.
+The choice of free parameter \(r_{ag}\) (it is called the bandwidth in some literature) exhibits a strong influence on the results.
+It can be obtained from sophisticated algorithms to achieve an optimal PDF estimation~\cite{Botev2010KernelDiffusion}.
+% The rule of thumb for the choosing of threshold \(r_{ag}\) depends mainly on the noise level.
+In Fig.~\ref{fig:MRE}, the curve with \(r_{ag}=0.2\) can reflect the change of randomness at high SNR, but saturates in the low SNR region, in which case \(r_{ag}=0.4\) is preferred.
+This behaviour is observed because when the \(r_{ag}\) is small, the algorithm cannot accurately quantify the degree of aggregation of large scale distributed data samples.
+In our application, inaccurate probability value is not a issue, since a TDO or CFO with minimum entropy is what we actually need to search for.
+Empirical, $r_{ag}$ is set equal to the root-mean-square value of the noise.
 
-% Similar with ApEn and SampEn algorithms, 
-It is best to apply the modified R\'enyi entropy estimation using a few hundred samples,
-because the required distance calculation exhibits quadratic growth with number of data samples. 
-The computational complexity can be relieved by either skipping the distance calculation of aggregated samples or using other distance metric (Chebychev et al. \cite{Cha2007}).
-However, this is not an issue in our application since a reliable synchronization  recovery with less data samples is always preferred, and it is an advantage in tracking the dynamic channel conditions. 
-% 跟 histogram 比较性能
-% r 选择有什么影响
+Another free parameter is the number of samples, which is set equal to a few hundred in our application.
+Entropy estimation is more accurate with growing number of samples, but the required distance calculation will grow quadratically.
+% growth with number of data samples. 
+The computational complexity can be relieved by 
+% either skipping the distance calculation of aggregated samples or 
+using other distance metric (Chebychev et al. \cite{Cha2007}).
+However, it will cause reduced tracking ability, which means the algorithm cannot adapt to the time varying channel effectively.
+As such, the choice of number of samples depends both on the dynamic channel conditions and the hardware capabilities.
+% this is not an issue in our application since a reliable synchronization  recovery with less data samples is always preferred, and it is an advantage in tracking the dynamic channel conditions. 
+% * <x.liu@dal.ca> 2018-02-06T19:39:23.158Z:
+% 
+% I don't know how to make rigorous treatment for r_{ag} and number of samples in these two paragraphs. they are more empirical parameters to me, sadly 
+% 
+% ^.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Implementation of Symbol Timing and Carrier Frequency Recovery}
 \label{sec:imple}
@@ -512,13 +579,13 @@ H_{BMRE}= 1- \frac{ H_{ag}}{ N(N-1)/2}.
 A typical case is given here to show how the entropy minimization based symbol timing recovery works.
 The received frame consists of 400 QPSK modulated random symbols, 
 which are pulse shaped by a RRC filter with a rolloff factor of 0.5 to generate a baseband complex envelop.
+The oversampling rate is 40 to provide more details in the eye diagram.
 An AWGN channel is assumed with $E_s/N_0 = 18~\text{dB}$. 
 After the matched filter, the eye diagram of the real component of the signal is plotted in the upper part of Fig. \ref{fig:timing}, and both the BMRE and MRE estimation results are shown in the lower part,
 % the entropy results estimated by both original and modified algorithms are shown in the lower part,
 % as well as its entropy are plotted in , where
 where the threshold $r_{ag}=0.25$ and \(r_{mg}=0.3\).
-% The ad-hoc entropy estimation algorithm discussed in Section \ref{sec:adhoc} is used to evaluate the timing phase entropy of the eye diagram, where the threshold $r=0.25$.
-% The timing phase entropy as a function of normalized timing offset is plotted as a solid red line in the lower part of Fig. \ref{fig:timing}, such that the two figures can be viewed under the same x-axis.
+
 
 \begin{figure}[htbp]
 \centering
@@ -531,7 +598,6 @@ where the threshold $r_{ag}=0.25$ and \(r_{mg}=0.3\).
 From Fig.~\ref{fig:timing}, the entropy reaches a global minimum in the centre of the eye diagram, and its value is close to 0.75 as predicted by~(\ref{eq:adEntQPSK}).
 With an increase of timing offset, the entropy increases, indicating  more randomness introduced by ISI.
 When the timing offset is beyond $\pm 0.35$, the  entropy from the MRE estimation goes down and creates a local minimum in the symbol transition area. 
-% This is because the randomness reduces when the timing phase is close to the symbol transition area.
 This phenomenon is also illustrated in the eye diagram, where the samples aggregate into three visible groups (with the amplitudes of \(\pm 1\) and 0).
 % The local minimum is not a big issue if the SNR is high and a global search is applied, but it will deteriorate the performance in low SNR cases or when using gradient based search algorithms.
 
@@ -543,7 +609,7 @@ As such, with the BMRE estimation algorithm, the local entropy minima due to the
 % In Fig.~\ref{fig:sysconf}, the timing recovery block is placed before carrier recovery, so the input signal of timing recovery may contain uncompensated CFO.
 % We shall evaluate the viability of the proposed algorithm in such conditions. 
 Next, the impact of timing recovery in presence of uncompensated CFO will be evaluated.  
-Theoretically, the previous analysis of timing phase entropy still holds, but the CFO does introduce extra entropy in the estimation.
+Theoretically, the previous analysis of eye diagram entropy still holds, but the CFO does introduce extra entropy in the estimation.
 To understand how the CFO affects the eye diagram entropy, another simulation is conducted with the same parameters as in the early part of this section,
 and the only difference is that a CFO at 1\% of symbol rate is introduced.
 The eye diagram and the corresponding entropy are depicted in Fig. \ref{fig:timing_freq}.
@@ -567,33 +633,43 @@ However, the BMRE algorithm shows superior performance:
 the curve is not flat anymore but continue growing with the same gradient as a function of timing offset.
 This feature shows a good adaptation of the BMRE algorithm, and proves that the `symbol timing before carrier recovery' configuration is feasible.
 
-% \subsubsection{A Feedforward Timing Phase Estimator}
-% \label{sec:timing_ff}
-Next, an algorithm that can estimate the TD for a signal with low oversampling rate is proposed.
-A global search for timing phase with minimum eye diagram entropy is not an elegant solution, especially when a high oversampling rate is not available.
-Recall that the widely used feedforward symbol timing method, the O\&M algorithm, uses as low as 4 samples per symbol, and its TD is given by
+
+Next, an algorithm that can estimate the TDO for a signal with low oversampling rate is proposed.
+In the previous discussion, a global search for TDO with minimum eye diagram entropy requires a high oversampling rate (normally more than 10 samples per symbol).
+However, this is not always available in practice, especially for high speed communication.
+% is not an elegant solution, especially when a high oversampling rate is not available.
+Recall that the widely used feedforward symbol timing method, the O\&M algorithm, uses as low as 4 samples per symbol, and its TDO is given by
 \begin{equation}
 \tau=\frac{T}{2\pi}\arg \left\{ {\sum\limits_{i = 1}^{N} {x_i^2{e^{ - j2\pi (i-1)/N_{sps}}}} } \right\},
 \label{eq:om}
 \end{equation}
-where \(T\) is the symbol period and \(N_{sps}\) is the number of samples per symbol.
-The operation \(\arg( \cdot )\) returns the phase angles, in radians.
+where \(T\) is the symbol period and \(N_{sps}\) is the oversampling rate.
+The operation \(\arg( \cdot )\) returns the phase angles in radians.
 The guiding principle of the O\&M algorithm is to apply a discrete Fourier transform (DFT) to the squared signal \(x_i^2\),
-and the TD is extracted from the angle of the resulting spectrum line at the symbol rate.
+and the TDO is extracted from the angle of the resulting spectrum line at the symbol rate.
 
-The same approach can be applied to the EM based symbol timing algorithm.
-To be specific, we can replace the squared signal term in O\&M algorithm with the eye diagram entropy,
-such that the TD can be found with
+The theory behind (\ref{eq:om}) is that the squared signal \(x_i^2\) is a periodic signal with the same frequency and phase as the pulse shaped symbols due to the cyclostationary property of \(x_i\).
+Thus, even with a low oversampling rate, the TDO can still be estimated by DFT.
+The eye diagram entropy curve exhibits a similar property as \(x_i^2\) within one period,
+therefore, the same approach can be applied to the EM based symbol timing algorithm.
+% * <x.liu@dal.ca> 2018-02-10T17:50:22.606Z:
+% 
+% did I explain it clearly?
+% 
+% ^.
+To be specific, we can replace \(x_i^2\) in~(\ref{eq:om}) with the eye diagram entropy \(H_i\), 
+such that the TDO can be found with
 \begin{equation}
-\tau  = \frac{T}{{2\pi }}\arg \left\{ {\sum\limits_{k = 1}^{N_{sps}} {H(k){e^{ - j2\pi (k-1)/N_{sps}}}} } \right\},
+\tau  = \frac{T}{{2\pi }}\arg \left\{ {\sum\limits_{i = 1}^{N_{sps}} {H_i{e^{ - j2\pi (i-1)/N_{sps}}}} } \right\},
 \label{eq:ff_alg}
 \end{equation}
-where \(H(k)\) is the eye diagram entropy at timing instant \(k\).
+% where \(H(k)\) is the eye diagram entropy at timing instant \(k\).
 Note that (\ref{eq:ff_alg}) assumes that the entropy curve is symmetric to the centre of the eyediagram,
 but the symmetry may not be maintained at low SNR or in a multipath channel.
 Its performance will be further discussed in Section \ref{sec:perfo}.
 
 \subsection{Carrier Frequency Recovery}
+\label{sec:carrier_recovery}
 This section will focus on the EM based carrier frequency recovery algorithm.
 Like the symbol timing recovery discussed above, the proposed algorithm is also NDA.
 The constellation diagram entropy is measured by defining an adequate range for the trial CFO, and a global search is applied to find the minimum entropy. 
@@ -714,7 +790,7 @@ In this figure, both QPSK and 16-QAM modulation schemes are tested.
 The RRC filter has a rolloff factor of 0.25. 
 Complex AWGN is added to the received signal, such that the symbol energy to noise spectral density ratio (\(E_s/N_0\)) ranges from 5 to 40~dB with a step of 5~dB.
 For each \(E_s/N_0\) setting, 500 Monte Carlo trials are tested.
-In each trial, a block size of 100 samples are evaluated to estimate the TD.
+In each trial, a block size of 100 samples are evaluated to estimate the TDO.
 After normalization by the symbol period, the timing error variances are plotted in the figure.
 It is necessary to compare the results with the theoretical limit.
 Following \cite{mengali1997synchronization}, the modified Cram\'er-Rao bound (MCRB) is also plotted as a reference.
@@ -727,11 +803,11 @@ Following \cite{mengali1997synchronization}, the modified Cram\'er-Rao bound (MC
 \end{figure}   
 
 Several conclusions can be draw from this figure.
-Generally speaking, when the  \(E_s/N_0\) is sufficiently high, the EM based symbol timing algorithm has lower variance than the O\&M algorithm for both QPSK and 16-QAM modulation schemes.
+Generally speaking, when the  \(E_s/N_0\) is sufficiently high, the EM based symbol timing algorithm has lower variance (better performance) than the O\&M algorithm for both QPSK and 16-QAM modulation schemes.
 % This transition \(E_s/N_0\) is 8~dB for QPSK and 27~dB for 16-QAM
 For both algorithms, the low modulation order tends to yield smaller timing variance.
 % In the high \(E_s/N_0\) region, the performance of O\&M algorithm is limited by the self noise. 
-When the \(E_s/N_0\) is greater than 25~dB, the O\&M reaches a lower boundary because of the strong self noise due to the small rolloff factor~\cite{mengali1997synchronization}. 
+When the \(E_s/N_0\) is greater than 25~dB, the O\&M reaches a lower boundary because of the strong self noise~\cite{mengali1997synchronization}. 
 % * <x.liu@dal.ca> 2017-10-27T13:27:20.450Z:
 % 
 % the self noise is actually ISI, but they used this term in the citation to differentiate thermal noise
@@ -739,7 +815,8 @@ When the \(E_s/N_0\) is greater than 25~dB, the O\&M reaches a lower boundary be
 % ^.
 % When the \(E_s/N_0\) is greater than 25~dB, the strong self noise due to the small rolloff factor makes O\&M algorithm reaches its lower boundary, while 
 In contrast, the EM algorithm keeps on improving with \(E_s/N_0\), since the timing variance keeps getting smaller with the increased \(E_s/N_0\).
-However, in low \(E_s/N_0\) region, the EM algorithm has inferior performance compared with ML algorithm.
+However, in low \(E_s/N_0\) region (lower than 21~dB for 16-QAM and 9~dB for QPSK), the EM algorithm has inferior performance compared with ML algorithm.
+This is because the ML algorithm is designed under AWGN assumption, while the EM algorithm is more suitable when the ISI dominates.
 
 
 Note that in the simulation, the rolloff factor is 0.25, which means the signal occupies relative small bandwidth but with significant ISI.
@@ -771,30 +848,63 @@ This is because, for the EM based algorithm in (\ref{eq:ff_alg}), it is assumed 
 Another example of an asymmetrical eye diagram entropy condition will be analyzed next. 
 
 % \textit{Experiment 3:EM based symbol timing recovery in multipath channel.}
-One of the most important issue a single carrier coherent communication system facing is the multipath channel.
-The EM based symbol timing recovery performs in these conditions will be assessed.
-Consider a set of BPSK modulated signal which is pulse shaped by the RRC filter with  a rolloff factor of 0.5.
-For simplicity reason, the multipath channel considered here has two paths of arrival.
+One key issue that single carrier coherent communication systems facing is the multipath channel impairment.
+Unpredictable channel impulse responses violate the Nyquist ISI criterion, and the communication performance is compromised.
+The nature of EM based symbol timing recovery is searching for timing instant with minimum ISI, which makes it more suitable for these conditions than ML based algorithms.
+To demonstrate this, consider a set of BPSK modulated signal which is pulse shaped by a RRC filter with  a rolloff factor of 0.5.
+For simplicity reason, a multipath channel considered here has one direct path (with an amplitude normalized to 1 and arrival time at 0) and two indirect paths.
 Its impulse response $h(t)$ is given by
 \begin{equation}
-h(t)=\delta(t)-0.5(t-1.8T),
+h(t)=\delta(t)+0.6(t-1.6T)-0.3(t-2.1T).
+\label{eq:multi_path}
 \end{equation}
-
-\noindent where the second tap is a fraction of the symbol period.  
-At the receiver, after the down converter and matched filter, the eye diagram and the corresponding entropy are shown in Fig. \ref{fig:per_timing_isi} for \(E_s/N_0\) equal to 25 dB. 
+% \noindent where the second tap is a fraction of the symbol period.  
+At the receiver, the eye diagram and the timing instants estimated by both O\&M and EM algorithms are plotted in Fig. \ref{fig:per_timing_isi} for \(E_s/N_0\) equal to 15 dB. 
 \begin{figure}[ht]
 \centering
 \includegraphics[width=3 in]{pic/per_timing_multi.eps}
-\caption{An eye diagram after a multipath channel (upper) and the corresponding eye diagram entropy (lower).}
+\caption{An eye diagram after a multipath channel and the corresponding timing estimation results.}
 \label{fig:per_timing_isi} 
 \end{figure} 
 
-In Fig.~\ref{fig:per_timing_isi}, there is no clear eye opening in the eye diagram, and the entropy curve is asymmetrical with respect to the centre with one global and several local minima. 
-The timing instant with the global minimum is located at -0.1, where the eye diagram has three small eyes at their maximum opening.
-The minimum entropy indicates that the least ISI is obtained at this instant.
-With this timing instant choice, an equalizer will converge faster and produce stable results.
-On the contrary, the timing instant found by ML based timing recovery algorithm is still around 0, 
-where the output energy is maximized but is subject to ISI.
+The eye diagram in Fig.~\ref{fig:per_timing_isi} is almost closed and shifted from the centre due to ISI.
+The bit error rates (BER) of demodulated samples recovered by two algorithms are compared without equalization.
+The EM algorithm can find the maximum eye opening and achieve a BER of 0.11\%.
+In contrast, the BER is 2.6\% when sampling with the O\&M algorithm and 0.23\% when sampling in the middle of the direct arrival.
+As one can observe in Fig.~\ref{fig:per_timing_isi}, the samples recovered by O\&M algorithm has the highest energy output, but the ISI is not considered at all.
+
+In fact, the results from channel given by  (\ref{eq:multi_path}) is not a special case.
+Consider a general form of multipath channel
+\begin{equation}
+h(t)=\delta(t)+a_1(t-b_1T)-a_2(t-b_2T),
+\label{eq:multi_path_2}
+\end{equation}
+with parameters randomly picked in Table~\ref{tb:multipath_para}.
+After 500 trials, the average BER obtained using  EM algorithm is 2.6\%, while it is 3.1\% for O\&M algorithm and 2.3\% if sampling in the middle of the direct arrival.
+The BER of EM algorithm clearly outperforms that of O\&M algorithm.
+However, the EM algorithm is not able to estimate a proper timing instant when a complete closed eye caused by severe ISI as observed in several cases during the simulation.
+That is the reason that it cannot beat the performance of sampling in the middle of direct arrival.
+\begin{table}[htbp]
+\centering
+\caption{Parameters used for multipath channel generation}
+\label{tb:multipath_para}
+\begin{tabular}{|*{5}{>{\centering\arraybackslash}p{1.2cm}|}}
+\hline
+     &$a_1$         & $a_2$         & $b_1$    & $b_2-b_1$ \\ \hline
+Range&-0.7$\sim$0.7 & -0.5$\sim$0.5 & 1$\sim$2 & 0$\sim$1  \\ \hline
+\end{tabular}
+\end{table}
+
+
+
+% there is no clear eye opening in the eye diagram, and the entropy curve is asymmetrical with respect to the centre with one global and several local minima. 
+% The timing instant with the global minimum is located at -0.1, where the eye diagram has three small eyes at their maximum opening.
+% The minimum entropy indicates that the least ISI is obtained at this instant.
+% With this timing instant choice, an equalizer will converge faster and produce stable results.
+% On the contrary, the timing instant found by ML based timing recovery algorithm is still around 0, 
+% where the output energy is maximized but is subject to ISI.
+
+% 无法使用快速算法
 
 Next, the performance of the carrier frequency recovery algorithms in presence of AWGN will be evaluated.
 In the carrier frequency recovery test, perfect symbol timing is assumed.
@@ -835,8 +945,8 @@ In Fig.~\ref{fig:per_freq}, the EM algorithm shows much smaller frequency varian
 This demonstrates its robust CFO estimation performance.
 However, the performance of the ML algorithm is mostly the same as the MCRB, making it slightly better than the EM algorithm.
 % When \(E_s/N_0\) is less than 10 dB, frequency variances of both the EM and ML algorithms grow 
-
-It is not surprising that the classic ML algorithm provides a better solution than the EM solution in AWGN, since theoretically it is the optimum solution in these conditions. Also, the EM algorithm is constrained on the resource available, and limited samples does degrade its performance. However, as has been shown above, in a multipath channel, the EM detector converges to a different solution than the ML algorithm, and this solution can provide a better synchronization parameter prior to an equalizer. As such, EM algorithms are more suitable for channels where high order statistics cannot be neglected.  
+It is not surprising that the classic ML algorithm provides a better solution than the EM solution in AWGN, since theoretically it is the optimum solution in these conditions. 
+% Also, the EM algorithm is constrained on the resource available, and limited samples does degrade its performance. However, as has been shown above, in a multipath channel, the EM detector converges to a different solution than the ML algorithm, and this solution can provide a better synchronization parameter prior to an equalizer. As such, EM algorithms are more suitable for channels where high order statistics cannot be neglected.  
 
 %A There are several reasons why the the EM algorithm may have inferior performance in symbol timing and carrier recovery than the ML based algorithms.
 % First, the EM based algorithms (not the EM criterion itself) are derived under a few assumptions and approximations, which are not always true in practice.
@@ -881,16 +991,17 @@ The carrier's centre frequency is 2.048~kHz.
 At the receiver, all signals are sampled at 44.1~kHz. The frame is first coarsely synchronized with the pilot block so that the data block can be extracted.
 Down conversion and a matched filter are applied to the data block to generate the complex baseband signal.
 
-When the signal is demodulated without synchronization, the bit error rate (BER) is 51\%, which means no information is recovered.
+When the signal is demodulated without synchronization, the BER is 51\%, which means no information is recovered.
 To recover the data, EM based synchronization is applied.
 For demonstration purposes, results from the 80 baud data are presented here.
 In each iteration, 200 symbols are fed into the synchronizer to estimate the TD and CFO. 
 The symbol timing and carrier frequency estimator outputs are shown in Fig. \ref{fig:per_exp}.
 
+% figure from DingleData80BdEntropy.m
 \begin{figure}[ht]
 \centering
 \includegraphics[width=3 in]{pic/per_exp.eps}
-\caption{Symbol timing and carrier frequency estimation results from EM based algorithms.}
+\caption{Symbol timing and carrier frequency offset estimation results from EM based algorithms.}
 \label{fig:per_exp} 
 \end{figure} 
 
