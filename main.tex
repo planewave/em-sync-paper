@@ -1,5 +1,6 @@
-% \documentclass[12pt,draftclsnofoot,peerreview,onecolumn]{IEEEtran}
-\documentclass[journal,comsoc, onecolumn, 12pt,draftclsnofoot]{IEEEtran} % ,]
+\documentclass[12pt,draftclsnofoot,peerreview,onecolumn]{IEEEtran}
+% \documentclass[journal,comsoc, onecolumn, 12pt,draftclsnofoot]{IEEEtran} % ,]
+% \documentclass[journal,comsoc]{IEEEtran}
 \usepackage[T1]{fontenc}
 % \usepackage{cite}
 % \usepackage{amsfonts}
@@ -24,6 +25,9 @@
 \else
  \usepackage[dvips]{graphicx}
 \fi
+
+% \usepackage[GREY]{epspdfconversion}
+
 
 % correct bad hyphenation here
 \hyphenation{op-tical net-works semi-conduc-tor}
@@ -371,12 +375,12 @@ Also, an analytically discussion is provided in \cite{Pedzisz2006} to prove that
 % such that the accumulated signal phase error is greater than the minimum phase difference of the signal modulation scheme. 
 % More discussion on entropy based carrier recovery can be found in \cite{Pedzisz2006}.
 
-\begin{figure*}[ht]
+\begin{figure}[ht]
 \centering
 \includegraphics[width=3 in]{pic/const_hst.eps}
 \caption{Constellation diagrams with different carrier frequency offset and the corresponding histograms of signal probability distribution.}
 \label{fig:const_hst} 
-\end{figure*}
+\end{figure}
 
 % add content from my wuwnet paper
 % The probability density function (PDF) of its instantaneous phase can be used to estimate the entropy, and with the help of
@@ -665,8 +669,8 @@ such that the TDO can be found with
 \end{equation}
 % where \(H(k)\) is the eye diagram entropy at timing instant \(k\).
 Note that (\ref{eq:ff_alg}) assumes that the entropy curve is symmetric to the centre of the eyediagram,
-but the symmetry may not be maintained at low SNR or in a multipath channel.
-Its performance will be further discussed in Section \ref{sec:perfo}.
+but the symmetry may not be maintained at low SNR or in a multipath channel, where such algorithm cannot be applied.
+% Its performance will be further discussed in Section \ref{sec:perfo}.
 
 \subsection{Carrier Frequency Recovery}
 \label{sec:carrier_recovery}
@@ -694,7 +698,8 @@ Therefore, the trough range is given by
 
 In (\ref{eq:freq_limit}), if \(N\) is equal to a few hundred samples, a given CFO that can fall into the entropy trough has to be on the order of 0.1\% of the symbol rate, which is relatively small compared to the CFO range that needs to be covered.
 The resulting entropy curve as a function of trial CFO is basically flat with a sharp trough.
-As a result, the linear search requires a very small step to achieve high frequency resolution, and the potential gradient descent algorithm cannot converge due to lack of gradient.
+Similar result has also been reported in~\cite{Pedzisz2006}. 
+Consequently, the linear search requires a very small step to achieve high frequency resolution, and the potential gradient descent algorithm cannot converge due to lack of gradient.
 In other words, an efficient search algorithm cannot be applied. 
 
 In order to cover a large estimation range without intensive computation, an algorithm that can expand the width of the trough is required.
@@ -768,14 +773,16 @@ For example, if the 400 samples are equally divided into 8 blocks, it is easy to
 \section{Performance Evaluation}
 \label{sec:perfo}
 In this section, the performance of the synchronization algorithms presented in the previous section are assessed in controlled conditions.
-In Section~\ref{sec:per_sim}, we will compare the timing and frequency estimation variance between the EM and ML algorithms.
-The effect of various channel impairments
+% In Section~\ref{sec:per_sim}, 
+We will compare the TDO and CFO estimation variance between the EM and ML algorithms.
+The effect of multipath impairment is analyzed on the system performance.
 % , including noise, timing with CFO as well as multipath 
-are analyzed on the system performance.
-Finally, to examine the EM algorithm in realistic time varying channels, in Section~\ref{sec:per_sea}, it is applied to a set of underwater acoustic communication data taken during a sea trial.
 
-\subsection{Numerical Simulation}
-\label{sec:per_sim}
+% Finally, to examine the EM algorithm in realistic time varying channels, in Section~\ref{sec:per_sea}, it is applied to a set of underwater acoustic communication data taken during a sea trial.
+
+% \subsection{Timing Recovery Performance}
+% \subsection{Numerical Simulation}
+% \label{sec:per_sim}
 % \subsection{Symbol Timing Performance}
 First, we will examine performance of the symbol timing recovery algorithm (\ref{eq:ff_alg}) in presence of AWGN.
 The O\&M algorithm
@@ -855,11 +862,12 @@ To demonstrate this, consider a set of BPSK modulated signal which is pulse shap
 For simplicity reason, a multipath channel considered here has one direct path (with an amplitude normalized to 1 and arrival time at 0) and two indirect paths.
 Its impulse response $h(t)$ is given by
 \begin{equation}
-h(t)=\delta(t)+0.6(t-1.6T)-0.3(t-2.1T).
+h(t)=\delta(t)+0.6\delta(t-1.6T)-0.3\delta(t-2.1T).
 \label{eq:multi_path}
 \end{equation}
 % \noindent where the second tap is a fraction of the symbol period.  
 At the receiver, the eye diagram and the timing instants estimated by both O\&M and EM algorithms are plotted in Fig. \ref{fig:per_timing_isi} for \(E_s/N_0\) equal to 15 dB. 
+% code: multi_path_new.m
 \begin{figure}[ht]
 \centering
 \includegraphics[width=3 in]{pic/per_timing_multi.eps}
@@ -874,13 +882,13 @@ In contrast, the BER is 2.6\% when sampling with the O\&M algorithm and 0.23\% w
 As one can observe in Fig.~\ref{fig:per_timing_isi}, the samples recovered by O\&M algorithm has the highest energy output, but the ISI is not considered at all.
 
 In fact, the results from channel given by  (\ref{eq:multi_path}) is not a special case.
-Consider a general form of multipath channel
+Consider a general form of three-path channel
 \begin{equation}
-h(t)=\delta(t)+a_1(t-b_1T)-a_2(t-b_2T),
+h(t)=\sum\limits_{n = 1}^{3}{a_n\delta(t - b_n T)},
 \label{eq:multi_path_2}
 \end{equation}
 with parameters randomly picked in Table~\ref{tb:multipath_para}.
-After 500 trials, the average BER obtained using  EM algorithm is 2.6\%, while it is 3.1\% for O\&M algorithm and 2.3\% if sampling in the middle of the direct arrival.
+After 500 trials, the average BER obtained using  EM algorithm is 2.9\%, while it is 3.3\% for O\&M algorithm and 2.5\% if sampling in the middle of the direct arrival.
 The BER of EM algorithm clearly outperforms that of O\&M algorithm.
 However, the EM algorithm is not able to estimate a proper timing instant when a complete closed eye caused by severe ISI as observed in several cases during the simulation.
 That is the reason that it cannot beat the performance of sampling in the middle of direct arrival.
@@ -890,8 +898,10 @@ That is the reason that it cannot beat the performance of sampling in the middle
 \label{tb:multipath_para}
 \begin{tabular}{|*{5}{>{\centering\arraybackslash}p{1.2cm}|}}
 \hline
-     &$a_1$         & $a_2$         & $b_1$    & $b_2-b_1$ \\ \hline
-Range&-0.7$\sim$0.7 & -0.5$\sim$0.5 & 1$\sim$2 & 0$\sim$1  \\ \hline
+     &$a_1$         & $a_2$         & $a_3$    \\ \hline
+Value &1 & -0.7$\sim$0.7 & -0.5$\sim$0.5  \\ \hline
+     &$b_1$         & $b_2$         & $b_3$    \\ \hline
+Value &0& 2$\sim$3 & 2$\sim$3  \\ \hline
 \end{tabular}
 \end{table}
 
@@ -906,7 +916,7 @@ Range&-0.7$\sim$0.7 & -0.5$\sim$0.5 & 1$\sim$2 & 0$\sim$1  \\ \hline
 
 % 无法使用快速算法
 
-Next, the performance of the carrier frequency recovery algorithms in presence of AWGN will be evaluated.
+Next, the performance of the CFO estimation in presence of AWGN will be evaluated.
 In the carrier frequency recovery test, perfect symbol timing is assumed.
 The signal is QPSK modulated with a CFO at 1\% of the symbol rate.
 Two algorithms are compared to the EM based algorithm for CFO estimation:
@@ -948,6 +958,13 @@ However, the performance of the ML algorithm is mostly the same as the MCRB, mak
 It is not surprising that the classic ML algorithm provides a better solution than the EM solution in AWGN, since theoretically it is the optimum solution in these conditions. 
 % Also, the EM algorithm is constrained on the resource available, and limited samples does degrade its performance. However, as has been shown above, in a multipath channel, the EM detector converges to a different solution than the ML algorithm, and this solution can provide a better synchronization parameter prior to an equalizer. As such, EM algorithms are more suitable for channels where high order statistics cannot be neglected.  
 
+The CFO estimation performance of both the EM and classic ML algorithms in multipath channels has also been examined.
+The random multipath channel described in~(\ref{eq:multi_path_2}) is used,
+and independent CFO is applied to each path.
+The performance of two algorithms has no significant difference in terms of BER if the same timing recovery is given.
+This is because no ISI gain can be received by EM algorithm as it in TDO estimation.
+The EM algorithm has an estimation variance that is slightly larger than that of ML algorithm, similar to the results in AWGN channel.
+The detail of this test is omitted due to tediousness and insignificance.  
 %A There are several reasons why the the EM algorithm may have inferior performance in symbol timing and carrier recovery than the ML based algorithms.
 % First, the EM based algorithms (not the EM criterion itself) are derived under a few assumptions and approximations, which are not always true in practice.
 % The second reason is that the ML criterion is theoretically the optimum solution in AWGN channels, 
@@ -962,70 +979,6 @@ It is not surprising that the classic ML algorithm provides a better solution th
 % ^.
 
 % test with sea trial measurement data
-\subsection{Algorithm Validation with Sea Trial Data }
-\label{sec:per_sea}
-In this section, the EM based synchronization algorithms will be validated with realistic data measured in a sea trial. 
-% \subsection{Sea Trial Environment and settings}
-An underwater acoustic communication experiment took place in the Northwest Arm near Halifax, Canada on July 6th 2017. 
-The experiment provided an opportunity to evaluate a variety of underwater communication algorithms.
-
-In the test area, the depth is reported to be approximately 10-13 m, and the receiver's deployment location is around 220 m away from the transmitter.
-The receiver drifts slowly because of the current.
-% The sea state is favourable to the test. 
-The acoustic propagation properties can also be observed using the channel impulse response in Fig. \ref{fig:chan_impu}, where there is a strong and stable direct path of arrival and a few multipath interference.
-\begin{figure}[htbp]
-\centering
-\includegraphics[width=3.5in]{pic/channel.png}
-\caption{The timing varying channel impulse response.}
-\label{fig:chan_impu} 
-\end{figure}
-
-A transmission frame is divided into pilot and data blocks. The pilot block is a wideband, linear frequency modulated chirp signal, which is used for frame synchronization.
-The data block is divided into four sections, and each section has a symbol rate of 240, 80, 15 and 5 baud respectively. 
-A pseudo-random noise (PN) sequence consisting of 512 symbols is used as the data content.
-The modulation scheme is QPSK, and the transmitted waveform is pulse shaped using an RRC filter with a rolloff factor of 0.5. 
-The carrier's centre frequency is 2.048~kHz. 
-
-% \subsection{Data Processing Results}
-% \label{sec:results}
-At the receiver, all signals are sampled at 44.1~kHz. The frame is first coarsely synchronized with the pilot block so that the data block can be extracted.
-Down conversion and a matched filter are applied to the data block to generate the complex baseband signal.
-
-When the signal is demodulated without synchronization, the BER is 51\%, which means no information is recovered.
-To recover the data, EM based synchronization is applied.
-For demonstration purposes, results from the 80 baud data are presented here.
-In each iteration, 200 symbols are fed into the synchronizer to estimate the TD and CFO. 
-The symbol timing and carrier frequency estimator outputs are shown in Fig. \ref{fig:per_exp}.
-
-% figure from DingleData80BdEntropy.m
-\begin{figure}[ht]
-\centering
-\includegraphics[width=3 in]{pic/per_exp.eps}
-\caption{Symbol timing and carrier frequency offset estimation results from EM based algorithms.}
-\label{fig:per_exp} 
-\end{figure} 
-
-% 先定时还是先频偏? 画出结果
-% \begin{figure}[htbp]
-% \centering
-% \subfigure[Symbol timing offset as a function of time]{
-% \label{fig:timing_result}
-% \includegraphics[width=3.1in]{timoff.png}}
-% % \hspace{0.2in} % 两图间距
-% \subfigure[Carrier frequency offset as a function of time]{
-% \label{fig:carrier_result}
-% \includegraphics[width=3.1in]{freoff.png}}
-% \caption{Synchronization results based on entropy minimization criterion.}
-% \label{fig:sync_results} %% 总 label
-% \end{figure}
-There is a total of 8192 QPSK symbols spanning a duration of 102.4~s.
-Both TD and CFO estimates are varying with time.
-This is attributed to the Doppler effect due to the relative motion between the transmitter and the receiver.
-
-% The synchronized data are depicted in Fig. \ref{fig:scatter}.
-After demodulation, the BER is 0.41\%. Even without equalization, the performance has improved. 
-As a comparison, with conventional synchronization methods (pilot and PLL based), the BER is 0.49\%.
-This result proves that the EM based synchronization algorithms are feasible and can reduce the communication system BER.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
