@@ -77,7 +77,7 @@ Several practical issues are addressed in implementing the entropy based synchro
 % Also, an entropy minimization based synchronization implementation with reduced complexity is described and its 
 Also, the performance of the proposed algorithm is evaluated in controlled conditions.
 % , as well as with realistic measurement data acquired during an underwater communication sea trial.
-It is shown that, as an alternative to maximum likelihood criterion, entropy minimization has great potential and offers certain advantages for synchronization in wireless communication, particularly with small excess bandwidth as well as  in multipath channel conditions.
+It is shown that, as an alternative to maximum likelihood criterion, entropy minimization has great potential and offers certain advantages for synchronization in wireless communication, particularly with small excess bandwidth as well as in multipath channel conditions. 
 
 \end{abstract}
 
@@ -256,10 +256,17 @@ These two objective functions are actually aimed at maximizing the energy of the
 This type of estimation method uses second-order statistics of the samples and is suitable for linear channels with additive white Gaussian noise (AWGN).
 In channels that are not dominated by AWGN but by ISI, a criterion that considers higher order statistics would be more appropriate.
 % Without the linearity and Gaussianity assumption, a criterion considering the higher order statistics would be appropriate.
-The entropy is a measure of randomness or uncertainty of this signal, and it is a function of the signal probabilities.
-As demonstrated in~\cite{Santamaria2002}, by using entropy instead of the likelihood function, the higher order statistics are taken into consideration.
-When the entropy reaches its minimum, it usually indicates minimized interference or impairments.
-That is why it can be chosen as an alternative cost function.
+
+The entropy is a measure of randomness or uncertainty of a signal, and it is a function of the signal PDF.
+By measuring entropy, the higher order statistics are taken into consideration~\cite{Santamaria2002}.
+According to information theory, the minimum entropy of any type of communication signal is equal to the entropy of the transmitted information. 
+It is understood that the purpose of synchronization is to remove the interference due to STO and CFO.  This specific interference introduces extra entropy to the received signal and, as such, the entropy can be used as a synchronization cost function.
+Unlike the ML criterion, the EM criterion does not assume the interference with any statistic model,
+making it difficult to prove the EM criterion mathematically.
+However, it will be demonstrated through rigorous numerical simulations in the rest of the paper.
+% As demonstrated in~\cite{Santamaria2002}, by using entropy instead of the likelihood function, the higher order statistics are taken into consideration.
+% When the entropy reaches its minimum, it usually indicates minimized interference or impairments.
+% That is why it can be chosen as an alternative cost function.
 
 The Shannon entropy is the most commonly used measure of the quantity of information  embedded in a signal.
 % In fact, we can also consider it as a measure of randomness or uncertainty of this signal.
@@ -400,7 +407,7 @@ the entropy has a global minimum and corresponds to a CFO equal to zero.
 % such that the accumulated signal phase error is greater than the minimum phase difference of the signal modulation scheme. 
 % More discussion on entropy based carrier recovery can be found in \cite{Pedzisz2006}.
 
-\begin{figure}[ht]
+\begin{figure}[htbp]
 \centering
 \includegraphics[width=3.5 in]{pic/const_hst-k.eps}
 \caption{Constellation diagrams with different CFOs and the corresponding histograms of signal probability distribution.}
@@ -443,6 +450,7 @@ Because the logarithm function is monotonic, minimizing~(\ref{eq:renyi2}) is equ
 Since the search for a minimum entropy relies on a relative value of \(H_{R2 }\),
 % only relative value is needed for searching a minimum entropy, 
 the logarithm function can be dropped out without affecting the estimation result.
+Recall Shannon entropy given in (\ref{eq:entropy}), the sum of \(p_k \log{p_k}\) is simplified to the sum of \(p_k^2\) here.
 % * <x.liu@dal.ca> 2018-02-06T18:16:02.187Z:
 % 
 % do I clearly state why the logarithm can be dropped here?  
@@ -453,7 +461,7 @@ To obtain a relative \(H_{R2 }\), an inefficient histogram based probability est
 % To further investigate the argument of the logarithm function in~(\ref{eq:renyi2}), 
 % a faster probability estimation method is required to replace the histogram based algorithm.
 As suggested in~\cite{Principe2000a}, the \textit{kernel density estimation} (KDE) is a faster probability estimation method that can replace the histogram based algorithm.
-It is also known as Parzen's window \cite{Parzen1962} as one of the well-known non-parametric approaches to estimate the underlying probability of samples. 
+It is also known as Parzen's window~\cite{Parzen1962} as one of the well-known non-parametric approaches to estimate the underlying probability of samples. 
 % which is suggested in~\cite{Principe2000a}.
 % is used to estimate the probabilities.
 % * <x.liu@dal.ca> 2018-02-02T04:09:58.876Z:
@@ -469,9 +477,10 @@ Specifically, given a set of \(N\) samples, \(i=1, \dots, N\), the sample probab
 where $K_r(\cdot)$ is a kernel function with a positive parameter $r$.
 Then, by substituting (\ref{eq:kde}) into (\ref{eq:renyi2}) and after some simplification, we have
 \begin{equation}
-H_{R2 }=-\log {\Bigg (}\frac{1}{N^2}\sum _{i=1}^{N}\sum _{j=1}^{N}K_{r}\left(x_i-x_j\right){\Bigg )}.
+H_{R2 }=-\log {\Bigg (}\frac{1}{N^2}\sum _{i=1}^{N}\sum _{j=1}^{N}K_{r}\left(x_i-x_j\right){\Bigg )},
 \label{eq:ker_ent_est}
 \end{equation}
+where \(p_k^2\) in (\ref{eq:renyi2}) is directly estimated by the kernel function.
 
 Among various kernel functions, the Gaussian kernel is adopted in~\cite{Principe2000a}, but it can be further simplified to a top-hat kernel (at a cost of reasonable accuracy loss) to accelerate the computation. 
 This kernel function is given by
@@ -510,7 +519,8 @@ H_{MRE}= \frac{ H_{sp}}{ N(N-1)/2}.
 
 
 % The last step normalizes $H_{sp}$, so that the modified R\'enyi entropy $H_{MR}$ does not depend on the number of samples.
-The final result \(H_{MRE}\) is the modified version of the quadratic R\'enyi entropy in which the logarithm function is dropped and in witch the kernel function is used for the probability estimation.
+The final result \(H_{MRE}\) is the modified version of the quadratic R\'enyi entropy in which the logarithm function is dropped.
+% and in witch the kernel function is used for the probability estimation.
 % We will call it the \textit{modified R\'enyi entropy} in the rest of the paper.
 Because of the normalization, the value of $H_{MRE}$ is limited from 0 to 1 and is unitless.
 This algorithm does not need to produce a histogram and does not need to compute the logarithm function, making it much faster than the histogram based conventional entropy estimation method.
@@ -918,11 +928,15 @@ Another example of an asymmetrical eye diagram entropy condition will be analyze
 A key issue that coherent communication systems are facing is the multipath channel impairment.
 Unpredictable channel impulse responses violate the Nyquist ISI criterion, and the communication performance is compromised.
 The nature of EM based symbol timing estimation is to search for timing instant with minimum ISI, which makes it more suitable for these conditions than ML based algorithms.
-To demonstrate this, a set of pulse shaped BPSK modulated signal is used as the transmit data.
+To demonstrate this, a set of BPSK modulated signal with 50\% excess bandwidth is used as the transmit data.
 For simplicity reason, a multipath channel considered here has one direct path (with an amplitude normalized to 1 and arrival time at 0) and two indirect paths.
 Its impulse response $h(t)$ is given by
+% \begin{equation}
+% h(t)=\delta(t)+0.6\delta(t-1.6T)-0.3\delta(t-2.1T).
+% \label{eq:multi_path}
+% \end{equation}
 \begin{equation}
-h(t)=\delta(t)+0.6\delta(t-1.6T)-0.3\delta(t-2.1T).
+h(t)=\delta(t)+0.5\delta(t-1.4T)+0.2\delta(t-3.5T).
 \label{eq:multi_path}
 \end{equation}
 % \noindent where the second tap is a fraction of the symbol period.  
@@ -938,22 +952,29 @@ At the receiver, the eye diagram and the timing instants estimated by both O\&M 
 
 The eye diagram in Fig.~\ref{fig:per_timing_isi} is almost closed and shifted from the centre due to ISI.
 The bit error rates (BER) of demodulated samples recovered by the two algorithms are compared without equalization.
-The EM algorithm can find the maximum eye opening and achieve a BER of 0.11\%.
-In contrast, the BER is 2.6\% if STO estimation using the O\&M algorithm and 0.23\% when sampling in the middle of the direct arrival.
-As one can observe in Fig.~\ref{fig:per_timing_isi}, the samples recovered by the O\&M algorithm have the highest energy output, but the ISI is not considered at all.
+The EM algorithm can find the maximum eye opening and achieve a BER of 1.2\%.
+In contrast, the BER is 5.9\% if STO estimation using the O\&M algorithm and 1.4\% when sampling in the middle of the direct arrival.
+As one can observe in Fig.~\ref{fig:per_timing_isi}, the samples recovered by the O\&M algorithm have the highest energy output, but with strong ISI.
 
-The results from channel given by  (\ref{eq:multi_path}) is not a special case.
-Consider a general form of three-path channel
+The results from channel given by (\ref{eq:multi_path}) is not a special case.
+Consider a general form for a three-path channel
 \begin{equation}
 h(t)=\sum\limits_{n = 1}^{3}{a_n\delta(t - b_n T)},
 \label{eq:multi_path_2}
 \end{equation}
 with parameters randomly picked in Table~\ref{tb:multipath_para}.
-After 500 trials, the average BER obtained using  EM algorithm is 2.9\%, while it is 3.3\% for O\&M algorithm and 2.5\% if sampling in the middle of the direct arrival.
-The BER of the EM algorithm clearly outperforms that of O\&M algorithm.
+The average BER is measured for different STO estimation algorithms: EM, O\&M as well as well as synchronizing to the middle of the direct arrival.
+Also, the effect of excess bandwidth is considered, and the simulation is conducted using 75\%, 50\% and 25\% excess bandwidth respectively. 
+% After 500 trials, the average BER obtained using  EM algorithm is 2.9\%, while it is 3.3\% for O\&M algorithm and 2.5\% if sampling in the middle of the direct arrival.
+
+The simulation results are summarized in Table~\ref{tb:multipath_ber}. The BER of the EM algorithm clearly outperforms that of O\&M algorithm for all excess bandwidth settings.
+As can be observed, the BER using O\&M algorithm increases significantly as the excess bandwidth is reduced. 
+In contrast, the BER using EM algorithm keeps to be close to that using the middle of the direct arrival.
+% does not degrade as significantly.  
 Note that the EM algorithm is not able to estimate a proper timing instant when the eye is completely closed due to severe ISI as observed during the simulation.
 % That is the reason that it cannot beat the performance of sampling in the middle of direct arrival.
-In these conditions, if the direct path arrival delay is available, it is preferable to synchronize to this instant. 
+In these conditions, it is preferable to synchronize to the direct path arrival. 
+In practice however, the exact timing instant of the direct path arrival is not available. 
 % \begin{table}[htbp]
 % \centering
 % \caption{Parameters used for multipath channel generation}
@@ -974,9 +995,23 @@ In these conditions, if the direct path arrival delay is available, it is prefer
 \begin{tabular}{|l|c|c|}
 \hline
       & Amplitude $a_n$ & Delay $b_n$ \\ \hline
-$n=1$ & 1               & 0           \\ \hline
-$n=2$ & $[-0.7, 0.7]$ & $[2, 3]$   \\ \hline
-$n=3$ & $[-0.5, 0.5]$ & $[2, 3]$   \\ \hline
+$n=1$ & \(1\)      & \(0\)            \\ \hline
+$n=2$ & $[0, 0.6]$ & $[1, 4]$         \\ \hline
+$n=3$ & $[0, 0.3]$ & $[1, 4]$         \\ \hline
+\end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\caption{Bit error rate results in random multipath channel}
+\label{tb:multipath_ber}
+\begin{tabular}{|c|c|c|c|l}
+\cline{1-4}
+                      & \multicolumn{3}{c|}{Bit Error Rate (\%)} &  \\ \cline{1-4}
+Excess Bandwidth (\%) & EM           & O\&M        & Mid         &  \\ \cline{1-4}
+75                    & 0.36         & 0.46        & 0.30        &  \\ \cline{1-4}
+50                    & 0.55         & 0.82        & 0.53        &  \\ \cline{1-4}
+25                    & 0.84         & 1.51        & 0.81        &  \\ \cline{1-4}
 \end{tabular}
 \end{table}
 
@@ -1056,12 +1091,11 @@ Nonetheless, this demonstrates the usefulness of the proposed estimator as a uni
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Conclusions}
+\section{Conclusion}
 \label{sec:conc}
-In this paper, a unified entropy minimization criterion has been proposed for symbol timing and carrier frequency recovery for wireless coherent receivers.
+In this paper, the entropy minimization has been proposed as a synchronization criterion for wireless coherent receivers.
 It is an alternative to the maximum likelihood criterion, which is the foundation of most of the standard synchronization algorithms. 
-By exploring the higher order statistics of the signal, entropy minimization is expected to have a better estimation performance, particularly in presence of multipath.  
-
+% By exploring the higher order statistics of the signal, entropy minimization is expected to have a better estimation performance, particularly in presence of multipath.  
 The symbol timing and carrier frequency offset estimation are implemented by measuring the entropy of the eye diagram and the constellation diagram.
 % * <x.liu@dal.ca> 2017-10-27T14:07:10.265Z:
 % 
@@ -1079,8 +1113,11 @@ Implementation constraints have also been presented.
 The proposed symbol timing algorithm can overcome local minima, it is insensitive to the carrier frequency offset, and can be used to extract the timing delay without the need for a high oversampling rate.
 The carrier frequency recovery algorithm uses block averaging to expand the estimation range without compromising accuracy. 
 
-The estimation performance of the proposed algorithms is compared with that of standard approaches by running a set of numerical simulations.
-It is found that the entropy minimization based algorithms can offer improved performance with small excess bandwidth as well as  in multipath channel conditions.
+The estimation performance of the proposed timing and frequency recovery algorithms is compared with that of standard approaches by running a set of numerical simulations. 
+It is shown that the entropy minimization has great potential and offers certain advantages for synchronization.
+Particularly, in multipath channels, it provides on average a better bit error rate. 
+The performance improvement is even more significant in communication systems with small excess bandwidth. 
+
 % Specifically, by running BER simulations, it is found that the entropy minimization based algorithms can offer improved symbol timing results
 % * <x.liu@dal.ca> 2017-10-27T14:20:13.538Z:
 % 
