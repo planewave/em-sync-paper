@@ -147,7 +147,8 @@ For both applications, the synchronization parameter that leads to a minimum ent
 % The algorithms that will be applied in this work are NDA and implemented in a feedforward structure, but they can be extended to other configurations under the same criterion.
 Note that it has been shown in~\cite{Pedzisz2006} that the CFO of phase-shift keying (PSK) modulated signals can be recovered by minimizing the entropy of the instantaneous phase probability density function (PDF).
 % Also, it has been reported that the error entropy minimization algorithms can be applied for channel equalization \cite{Santamaria2002}. 
-However, the CFO estimation in this work is applied to a broader type of modulation schemes, and to the authors' knowledge, the unified criterion for both symbol timing and carrier recovery has not been proposed before. 
+However, the CFO estimation in this work is applied to a broader type of modulation schemes. 
+The unified criterion for both symbol timing and carrier recovery has been briefly introduced in~\cite{Liu1711:Entropy}, while in this paper, a detailed conceptual analysis is provided. 
 
 Since Shannon's work~\cite{Shannon1948}, entropy is an important concept in information theory. 
 However, it is rarely used in practice, because it is difficult to estimate directly from samples without a model~\cite{Bercher2000}.
@@ -161,8 +162,8 @@ Many practical issues can be encountered when implementing EM based synchronizat
 These issues include undesired local minima, insufficient oversampling rate and the vanishing of the gradient.
 The third contribution of this work is a practical implementation that addresses these issues.
 
-The final part of this work is the evaluation of the  algorithm performance in controlled conditions. 
-% as well as in realistic underwater acoustic propagation conditions.  
+% The final part of this work is the evaluation of 
+The performance of the proposed symbol timing and carrier frequency recovery algorithms is also evaluated in controlled conditions. 
 The effect of various channel impairments, including noise and multipath, is analyzed on the system performance.  
 The EM based algorithms are found to have improved performance when the signal has a small excess bandwidth, so that it allows to provide better spectral efficiency.
 It is also demonstrated that ML based algorithms cannot achieve ideal synchronization in multipath channel propagation, while the EM criterion is a better choice in such conditions. 
